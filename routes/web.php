@@ -1,0 +1,211 @@
+<?php
+
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\TranslationController;
+use App\Http\Controllers\Student\ProfileController;
+use App\Http\Controllers\Student\ProgressController;
+use App\Http\Controllers\Student\ReportController;
+use App\Http\Controllers\Student\SubscriptionController;
+use App\Http\Controllers\HomeController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\Supervisor\CircleController as SupervisorCircleController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+// Language Switcher
+Route::get('/language/{locale}', function ($locale) {
+    try {
+        $activeLanguages = Cache::remember('active_languages', now()->addHour(), function () {
+            return \App\Models\Language::where('is_active', true)
+                ->pluck('code')
+                ->toArray();
+        });
+            
+        if (in_array($locale, $activeLanguages)) {
+            session()->put('locale', $locale);
+            app()->setLocale($locale);
+        }
+    } catch (\Exception $e) {
+        \Log::error('Language switch error: ' . $e->getMessage());
+    }
+    
+    return redirect()->back();
+})->name('language.switch');
+
+Route::get('/', [HomeController::class, 'index']);
+
+// Authentication routes
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/select-circle', [AuthController::class, 'selectCircle'])->name('select-circle');
+    Route::post('/select-circle', [AuthController::class, 'storeCircle']);
+    
+    // Profile routes for all roles
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    
+    // Password change routes for all roles
+    Route::get('/password/change', [\App\Http\Controllers\PasswordController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::put('/password/update', [\App\Http\Controllers\PasswordController::class, 'updatePassword'])->name('password.update');
+});
+
+// Admin routes
+Route::middleware(['auth', 'role:super_admin,department_admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+    
+    // Circle management
+    Route::resource('circles', \App\Http\Controllers\Admin\CircleController::class);
+    Route::get('/circles/{circle}/add-student', [\App\Http\Controllers\Admin\CircleController::class, 'showAddStudent'])->name('circles.add-student');
+    Route::post('/circles/{circle}/add-student', [\App\Http\Controllers\Admin\CircleController::class, 'addStudent'])->name('circles.store-student');
+    Route::delete('/circles/{circle}/students/{student}', [\App\Http\Controllers\Admin\CircleController::class, 'removeStudent'])->name('circles.remove-student');
+    
+    // Department management
+    Route::resource('departments', \App\Http\Controllers\Admin\DepartmentController::class);
+    
+    // User management
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    
+    // Reports management
+    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports');
+    Route::get('/reports/daily', [\App\Http\Controllers\Admin\ReportController::class, 'dailyReports'])->name('reports.daily');
+    Route::get('/reports/export', [\App\Http\Controllers\Admin\ReportController::class, 'export'])->name('reports.export');
+    Route::get('/reports/export-daily', [\App\Http\Controllers\Admin\ReportController::class, 'exportDaily'])->name('reports.export-daily');
+    Route::get('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
+    Route::get('/reports/{report}/edit', [\App\Http\Controllers\Admin\ReportController::class, 'edit'])->name('reports.edit');
+    Route::put('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'update'])->name('reports.update');
+    
+    // Subscription management
+    Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
+    
+    // Language management
+    Route::resource('languages', \App\Http\Controllers\Admin\LanguageController::class);
+    Route::post('/languages/{language}/toggle', [\App\Http\Controllers\Admin\LanguageController::class, 'toggleStatus'])->name('languages.toggle');
+    
+    // Translation management
+    Route::get('/translations', [\App\Http\Controllers\Admin\TranslationController::class, 'index'])->name('translations.index');
+    Route::post('/translations', [\App\Http\Controllers\Admin\TranslationController::class, 'store'])->name('translations.store');
+    Route::get('/translations/create', [\App\Http\Controllers\Admin\TranslationController::class, 'create'])->name('translations.create');
+    Route::get('/translations/{translation}/edit', [\App\Http\Controllers\Admin\TranslationController::class, 'edit'])->name('translations.edit');
+    Route::put('/translations/{translation}', [\App\Http\Controllers\Admin\TranslationController::class, 'update'])->name('translations.update');
+    Route::delete('/translations/{translation}', [\App\Http\Controllers\Admin\TranslationController::class, 'destroy'])->name('translations.destroy');
+    Route::post('/translations/generate', [\App\Http\Controllers\Admin\TranslationController::class, 'generate'])->name('translations.generate');
+    Route::post('/translations/copy', [\App\Http\Controllers\Admin\TranslationController::class, 'copy'])->name('translations.copy');
+    Route::post('/translations/import', [\App\Http\Controllers\Admin\TranslationController::class, 'import'])->name('translations.import');
+    Route::get('/translations/export', [\App\Http\Controllers\Admin\TranslationController::class, 'export'])->name('translations.export');
+    
+    // Settings
+    Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings');
+    Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'store'])->name('settings.store');
+});
+
+// Teacher routes
+Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->name('teacher.')->group(function () {
+    // Dashboard
+    Route::get('/', [App\Http\Controllers\Teacher\DashboardController::class, 'index'])->name('dashboard');
+    
+    // Circles management
+    Route::get('/circles', [App\Http\Controllers\Teacher\CircleController::class, 'index'])->name('circles.index');
+    Route::get('/circles/{circle}', [App\Http\Controllers\Teacher\CircleController::class, 'show'])->name('circles.show');
+    Route::get('/circles/{circle}/edit', [App\Http\Controllers\Teacher\CircleController::class, 'edit'])->name('circles.edit');
+    Route::put('/circles/{circle}', [App\Http\Controllers\Teacher\CircleController::class, 'update'])->name('circles.update');
+    Route::get('/circles/{circle}/students', [App\Http\Controllers\Teacher\CircleController::class, 'students'])->name('circles.students');
+    
+    // Daily Reports
+    Route::get('/daily-reports', [App\Http\Controllers\Teacher\DailyReportController::class, 'index'])->name('daily-reports.index');
+    Route::post('/daily-reports', [App\Http\Controllers\Teacher\DailyReportController::class, 'store'])->name('daily-reports.store');
+    Route::delete('/daily-reports/{report}', [App\Http\Controllers\Teacher\DailyReportController::class, 'destroy'])->name('daily-reports.destroy');
+    Route::get('/daily-reports/history', [App\Http\Controllers\Teacher\DailyReportController::class, 'history'])->name('daily-reports.history');
+    
+    // Points Management
+    Route::get('/points', [App\Http\Controllers\Teacher\PointsController::class, 'index'])->name('points.index');
+    Route::post('/points', [App\Http\Controllers\Teacher\PointsController::class, 'update'])->name('points.update');
+    Route::get('/points/student/{student}', [App\Http\Controllers\Teacher\PointsController::class, 'history'])->name('points.history');
+    Route::get('/points/leaderboard', [App\Http\Controllers\Teacher\PointsController::class, 'leaderboard'])->name('points.leaderboard');
+});
+
+// Student routes
+Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
+    
+    // Circle management for students
+    Route::get('/circles', [\App\Http\Controllers\Student\CircleController::class, 'index'])->name('circles.index');
+    Route::get('/circles/{circle}', [\App\Http\Controllers\Student\CircleController::class, 'show'])->name('circles.show');
+    Route::get('/browse-circles', [\App\Http\Controllers\Student\CircleController::class, 'browseCircles'])->name('circles.browse');
+    Route::post('/enroll', [\App\Http\Controllers\Student\CircleController::class, 'enroll'])->name('circles.enroll');
+    
+    // Daily Report shortcut (for backward compatibility)
+    Route::get('/daily-report', [App\Http\Controllers\Student\ReportController::class, 'create'])->name('daily-report');
+    
+    // Progress routes
+    Route::get('/progress', [App\Http\Controllers\Student\ProgressController::class, 'index'])->name('progress');
+    Route::get('/progress/index', [App\Http\Controllers\Student\ProgressController::class, 'index'])->name('progress.index');
+    Route::get('/progress/points', [App\Http\Controllers\Student\ProgressController::class, 'points'])->name('progress.points');
+    Route::get('/progress/attendance', [App\Http\Controllers\Student\ProgressController::class, 'attendance'])->name('progress.attendance');
+    
+    // Subscriptions shortcut (for backward compatibility)
+    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+    
+    // Daily Reports
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.create');
+    Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
+    Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
+    Route::get('/reports/{report}/edit', [ReportController::class, 'edit'])->name('reports.edit');
+    Route::put('/reports/{report}', [ReportController::class, 'update'])->name('reports.update');
+    Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
+    Route::delete('/reports/date/{date}', [ReportController::class, 'destroyByDate'])->name('reports.destroyByDate');
+    
+    // Student Profile
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [ProfileController::class, 'showChangePasswordForm'])->name('profile.change-password');
+    Route::put('/profile/change-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+    
+    // Student Subscriptions
+    Route::get('/subscriptions/create', [SubscriptionController::class, 'create'])->name('subscriptions.create');
+    Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+    Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
+    Route::get('/subscriptions/{subscription}/payment', [SubscriptionController::class, 'showPayment'])->name('subscriptions.payment');
+    Route::post('/subscriptions/{subscription}/payment', [SubscriptionController::class, 'processPayment'])->name('subscriptions.process-payment');
+    Route::post('/subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
+    Route::get('/subscriptions/plans', [SubscriptionController::class, 'getPlans'])->name('subscriptions.plans');
+    Route::get('/subscriptions/renew', [SubscriptionController::class, 'renewForm'])->name('subscriptions.renew');
+});
+
+// Supervisor routes
+Route::middleware(['auth', 'role:supervisor'])->prefix('supervisor')->name('supervisor.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('supervisor.dashboard');
+    })->name('dashboard');
+    
+    // Circle management
+    Route::get('/circles', [SupervisorCircleController::class, 'index'])->name('circles.index');
+    Route::get('/circles/{circle}', [SupervisorCircleController::class, 'show'])->name('circles.show');
+    Route::get('/circles/{circle}/edit', [SupervisorCircleController::class, 'edit'])->name('circles.edit');
+    Route::put('/circles/{circle}', [SupervisorCircleController::class, 'update'])->name('circles.update');
+    
+    // Student management within circles
+    Route::get('/circles/{circle}/manage-students', [SupervisorCircleController::class, 'manageStudents'])->name('circles.manage-students');
+    Route::post('/circles/{circle}/students', [SupervisorCircleController::class, 'addStudent'])->name('circles.students.add');
+    Route::delete('/circles/{circle}/students/{student}', [SupervisorCircleController::class, 'removeStudent'])->name('circles.students.remove');
+    Route::get('/circles/{circle}/students/{student}', [SupervisorCircleController::class, 'viewStudent'])->name('circles.students.view');
+});

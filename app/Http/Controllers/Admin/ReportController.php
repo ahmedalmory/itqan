@@ -1,0 +1,394 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\DailyReport;
+use App\Models\Department;
+use App\Models\StudyCircle;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+
+class ReportController extends Controller
+{
+    /**
+     * Display a listing of the reports.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $query = DB::table('daily_reports')
+            ->join('users', 'daily_reports.student_id', '=', 'users.id')
+            ->leftJoin('circle_students', 'users.id', '=', 'circle_student.student_id')
+            ->leftJoin('study_circles', 'circle_student.circle_id', '=', 'study_circles.id')
+            ->leftJoin('departments', 'study_circles.department_id', '=', 'departments.id')
+            ->select(
+                DB::raw('DATE_FORMAT(daily_reports.report_date, "%Y-%m") as month'),
+                'departments.name as department_name',
+                DB::raw('COUNT(DISTINCT users.id) as students_count'),
+                DB::raw('COUNT(daily_reports.id) as reports_count'),
+                DB::raw('AVG(daily_reports.grade) as average_grade'),
+                DB::raw('SUM(daily_reports.memorization_parts) as total_memorization'),
+                DB::raw('SUM(daily_reports.revision_parts) as total_revision')
+            )
+            ->groupBy('month', 'departments.name');
+            
+        // Filter by department if provided
+        if ($request->has('department_id') && $request->department_id) {
+            $query->where('departments.id', $request->department_id);
+        }
+        
+        // Filter by date range if provided
+        if ($request->has('date_from') && $request->date_from) {
+            $query->where('daily_reports.report_date', '>=', $request->date_from);
+        }
+        
+        if ($request->has('date_to') && $request->date_to) {
+            $query->where('daily_reports.report_date', '<=', $request->date_to);
+        }
+        
+        $reports = $query->orderBy('month', 'desc')->paginate(20);
+        $departments = Department::orderBy('name')->get();
+        
+        return view('admin.reports.index', compact('reports', 'departments'));
+    }
+    
+    /**
+     * Display daily reports.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function dailyReports(Request $request)
+    {
+        $query = DailyReport::with(['student', 'student.circles', 'student.circles.department'])
+            ->orderBy('report_date', 'desc');
+            
+        // Filter by student if provided
+        if ($request->has('student_id') && $request->student_id) {
+            $query->where('student_id', $request->student_id);
+        }
+        
+        // Filter by circle if provided
+        if ($request->has('circle_id') && $request->circle_id) {
+            $query->whereHas('student.circles', function($q) use ($request) {
+                $q->where('study_circles.id', $request->circle_id);
+            });
+        }
+        
+        // Filter by department if provided
+        if ($request->has('department_id') && $request->department_id) {
+            $query->whereHas('student.circles.department', function($q) use ($request) {
+                $q->where('departments.id', $request->department_id);
+            });
+        }
+        
+        // Filter by date range if provided
+        if ($request->has('date_from') && $request->date_from) {
+            $query->where('report_date', '>=', $request->date_from);
+        }
+        
+        if ($request->has('date_to') && $request->date_to) {
+            $query->where('report_date', '<=', $request->date_to);
+        }
+        
+        $reports = $query->paginate(20);
+        $students = User::where('role', 'student')->orderBy('name')->get();
+        $circles = StudyCircle::orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
+        
+        return view('admin.reports.daily', compact('reports', 'students', 'circles', 'departments'));
+    }
+    
+    /**
+     * Export reports to CSV.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function export(Request $request)
+    {
+        $query = DailyReport::with(['student', 'student.circles', 'student.circles.department'])
+            ->orderBy('report_date', 'desc');
+            
+        // Apply the same filters as in dailyReports method
+        if ($request->has('student_id') && $request->student_id) {
+            $query->where('student_id', $request->student_id);
+        }
+        
+        if ($request->has('circle_id') && $request->circle_id) {
+            $query->whereHas('student.circles', function($q) use ($request) {
+                $q->where('study_circles.id', $request->circle_id);
+            });
+        }
+        
+        if ($request->has('department_id') && $request->department_id) {
+            $query->whereHas('student.circles.department', function($q) use ($request) {
+                $q->where('departments.id', $request->department_id);
+            });
+        }
+        
+        if ($request->has('date_from') && $request->date_from) {
+            $query->where('report_date', '>=', $request->date_from);
+        }
+        
+        if ($request->has('date_to') && $request->date_to) {
+            $query->where('report_date', '<=', $request->date_to);
+        }
+        
+        $reports = $query->get();
+        
+        // Generate CSV content
+        $headers = [
+            'Student Name',
+            'Circle',
+            'Department',
+            'Report Date',
+            'Memorization Parts',
+            'Revision Parts',
+            'Grade',
+            'Memorization From',
+            'Memorization To',
+            'Notes'
+        ];
+        
+        $callback = function() use ($reports, $headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+            
+            foreach ($reports as $report) {
+                $circleName = $report->student && $report->student->circles->first() ? $report->student->circles->first()->name : 'N/A';
+                $departmentName = $report->student && $report->student->circles->first() && $report->student->circles->first()->department ? $report->student->circles->first()->department->name : 'N/A';
+                
+                $row = [
+                    $report->student ? $report->student->name : 'Unknown Student',
+                    $circleName,
+                    $departmentName,
+                    $report->report_date->format('Y-m-d'),
+                    $report->memorization_parts,
+                    $report->revision_parts,
+                    $report->grade,
+                    $report->memorization_from_surah . ':' . $report->memorization_from_verse,
+                    $report->memorization_to_surah . ':' . $report->memorization_to_verse,
+                    $report->notes
+                ];
+                
+                fputcsv($file, $row);
+            }
+            
+            fclose($file);
+        };
+        
+        $filename = 'daily_reports_' . date('Y-m-d') . '.csv';
+        
+        return Response::stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Export daily reports to CSV.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function exportDaily(Request $request)
+    {
+        $query = DailyReport::with([
+            'student', 
+            'student.circles', 
+            'student.circles.department',
+            'memorization_from_surah',
+            'memorization_to_surah',
+            'revision_from_surah',
+            'revision_to_surah'
+        ])->orderBy('report_date', 'desc');
+            
+        // Filter by student name if provided
+        if ($request->has('student_name') && $request->student_name) {
+            $query->whereHas('student', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->student_name . '%');
+            });
+        }
+        
+        // Filter by circle if provided
+        if ($request->has('circle_id') && $request->circle_id) {
+            $query->whereHas('student.circles', function($q) use ($request) {
+                $q->where('study_circles.id', $request->circle_id);
+            });
+        }
+        
+        // Filter by department if provided
+        if ($request->has('department_id') && $request->department_id) {
+            $query->whereHas('student.circles.department', function($q) use ($request) {
+                $q->where('departments.id', $request->department_id);
+            });
+        }
+        
+        // Filter by date range if provided
+        if ($request->has('date_from') && $request->date_from) {
+            $query->where('report_date', '>=', $request->date_from);
+        }
+        
+        if ($request->has('date_to') && $request->date_to) {
+            $query->where('report_date', '<=', $request->date_to);
+        }
+        
+        $reports = $query->get();
+        
+        // Generate CSV content
+        $headers = [
+            'ID',
+            'Student Name',
+            'Circle',
+            'Department',
+            'Report Date',
+            'Memorization Parts',
+            'Revision Parts',
+            'Grade',
+            'Memorization From',
+            'Memorization To',
+            'Revision From',
+            'Revision To',
+            'Notes',
+            'Created At'
+        ];
+        
+        $callback = function() use ($reports, $headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+            
+            foreach ($reports as $report) {
+                $circleName = $report->student && $report->student->circles->first() ? $report->student->circles->first()->name : 'N/A';
+                $departmentName = $report->student && $report->student->circles->first() && $report->student->circles->first()->department ? $report->student->circles->first()->department->name : 'N/A';
+                
+                $memorizationFrom = $report->memorization_from_surah ? 
+                    $report->memorization_from_surah->name . ' (' . $report->memorization_from_verse . ')' : 'N/A';
+                    
+                $memorizationTo = $report->memorization_to_surah ? 
+                    $report->memorization_to_surah->name . ' (' . $report->memorization_to_verse . ')' : 'N/A';
+                    
+                $revisionFrom = $report->revision_from_surah ? 
+                    $report->revision_from_surah->name . ' (' . $report->revision_from_verse . ')' : 'N/A';
+                    
+                $revisionTo = $report->revision_to_surah ? 
+                    $report->revision_to_surah->name . ' (' . $report->revision_to_verse . ')' : 'N/A';
+                
+                $row = [
+                    $report->id,
+                    $report->student ? $report->student->name : 'Unknown Student',
+                    $circleName,
+                    $departmentName,
+                    $report->report_date->format('Y-m-d'),
+                    $report->memorization_parts,
+                    $report->revision_parts,
+                    $report->grade,
+                    $memorizationFrom,
+                    $memorizationTo,
+                    $revisionFrom,
+                    $revisionTo,
+                    $report->notes,
+                    $report->created_at->format('Y-m-d H:i:s')
+                ];
+                
+                fputcsv($file, $row);
+            }
+            
+            fclose($file);
+        };
+        
+        $filename = 'daily_reports_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        return Response::stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Display the specified report.
+     *
+     * @param  \App\Models\DailyReport  $report
+     * @return \Illuminate\Http\Response
+     */
+    public function show(DailyReport $report)
+    {
+        $report->load([
+            'student', 
+            'student.circles',
+            'student.circles.department',
+            'memorization_from_surah',
+            'memorization_to_surah',
+            'revision_from_surah',
+            'revision_to_surah'
+        ]);
+        
+        return view('admin.reports.show', compact('report'));
+    }
+
+    /**
+     * Show the form for editing the specified report.
+     *
+     * @param  \App\Models\DailyReport  $report
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(DailyReport $report)
+    {
+        $report->load([
+            'student', 
+            'memorization_from_surah',
+            'memorization_to_surah',
+            'revision_from_surah',
+            'revision_to_surah'
+        ]);
+        
+        $students = User::where('role', 'student')->orderBy('name')->get();
+        $surahs = DB::table('surahs')->orderBy('id')->get();
+        
+        return view('admin.reports.edit', compact('report', 'students', 'surahs'));
+    }
+
+    /**
+     * Update the specified report.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\DailyReport  $report
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, DailyReport $report)
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:users,id',
+            'report_date' => 'required|date',
+            'memorization_parts' => 'required|numeric|min:0|max:8',
+            'revision_parts' => 'required|numeric|min:0|max:20',
+            'memorization_from_surah_id' => 'nullable|exists:surahs,id',
+            'memorization_from_verse' => 'nullable|numeric|min:1',
+            'memorization_to_surah_id' => 'nullable|exists:surahs,id',
+            'memorization_to_verse' => 'nullable|numeric|min:1',
+            'revision_from_surah_id' => 'nullable|exists:surahs,id',
+            'revision_from_verse' => 'nullable|numeric|min:1',
+            'revision_to_surah_id' => 'nullable|exists:surahs,id',
+            'revision_to_verse' => 'nullable|numeric|min:1',
+            'grade' => 'required|numeric|min:0|max:100',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+        
+        try {
+            DB::transaction(function () use ($validated, $report) {
+                $report->update($validated);
+            });
+            
+            return redirect()->route('admin.reports.show', $report)
+                ->with('success', t('Report updated successfully.'));
+                
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', t('Failed to update report: ') . $e->getMessage());
+        }
+    }
+} 

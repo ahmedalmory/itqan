@@ -1,0 +1,188 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Base Variables */
+:root {
+    --primary-color: #1FA959;
+    --primary-dark: #198A47;
+    --primary-light: #F0F9F2;
+    --secondary-color: #8D6E63;
+    --accent-color: #FFC107;
+}
+
+/* Global Styles */
+body {
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Card Styles */
+.card {
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: none;
+}
+
+.card-header {
+    background-color: var(--primary-light);
+    border-bottom: none;
+    border-top-left-radius: 15px !important;
+    border-top-right-radius: 15px !important;
+    font-weight: 600;
+}
+
+/* Table Styles */
+.table th {
+    background-color: var(--primary-light);
+    font-weight: 600;
+    border: none;
+}
+
+/* Form Styles */
+.form-control,
+.form-select {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(31, 169, 89, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+/* Badges and Status Indicators */
+.status-badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.status-active {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.status-inactive {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.status-pending {
+    background-color: #fff8e1;
+    color: #ff8f00;
+}
+
+/* Sidebar Styles */
+.sidebar-nav {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-nav .nav-link {
+    color: #495057;
+    border-radius: 8px;
+    margin-bottom: 0.25rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s;
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: #f8f9fa;
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.sidebar-nav .nav-link i {
+    width: 1.5rem;
+    margin-right: 0.5rem;
+    text-align: center;
+}
+
+/* Dashboard Stats Cards */
+.stat-card {
+    background-color: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(31, 169, 89, 0.15);
+}
+
+.stat-card .stat-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2.5rem;
+    opacity: 0.15;
+    color: var(--primary-color);
+}
+
+.stat-card .stat-title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6c757d;
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin: 0.5rem 0;
+}
+
+.stat-card .stat-description {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
