@@ -21,6 +21,7 @@
     <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
     
     <style>
+        /* Base Variables */
         :root {
             --primary-color: #1FA959;
             --primary-dark: #198A47;
@@ -30,12 +31,59 @@
             --header-pattern: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/svg%3E");
         }
 
+        /* Global Styles */
         body {
             font-family: 'Noto Kufi Arabic', sans-serif;
             background-color: #f8f9fa;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus,
+        .btn-outline-primary:active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(31, 169, 89, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--primary-light);
+            border-bottom: none;
+            border-top-left-radius: 15px !important;
+            border-top-right-radius: 15px !important;
+            font-weight: 600;
         }
 
         /* Navbar Styles */
@@ -106,6 +154,58 @@
             transform: translateY(-2px);
         }
 
+        /* Form Styles */
+        .form-control,
+        .form-select {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(31, 169, 89, 0.25);
+        }
+
+        .form-label {
+            font-weight: 500;
+        }
+
+        /* Table Styles */
+        .table {
+            vertical-align: middle;
+        }
+
+        .table th {
+            font-weight: 600;
+            background-color: var(--primary-light);
+            border: none;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.5rem 0.75rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .status-active {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .status-inactive {
+            background-color: #ffebee;
+            color: #d32f2f;
+        }
+
+        .status-pending {
+            background-color: #fff8e1;
+            color: #ff8f00;
+        }
+
+        /* Avatar and User Menu */
         .avatar-circle {
             width: 30px;
             height: 30px;
@@ -124,37 +224,7 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        .navbar-toggler {
-            border-color: rgba(255, 255, 255, 0.3);
-            padding: 0.5rem;
-        }
-
-        .navbar-toggler:focus {
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
-        }
-
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-        }
-
-        /* Navbar Collapse Fix */
-        .navbar-collapse {
-            visibility: visible !important;
-        }
-
-        @media (max-width: 991.98px) {
-            .navbar-collapse:not(.show) {
-                display: none !important;
-            }
-        }
-
-        @media (min-width: 992px) {
-            .navbar-collapse {
-                display: flex !important;
-                flex-basis: auto !important;
-            }
-        }
-
+        /* Dropdown Styles */
         .dropdown-menu {
             border: none;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -224,7 +294,7 @@
             font-size: 1.1rem;
         }
 
-        /* Page Styles */
+        /* Page Title */
         .page-title {
             font-size: 2rem;
             font-weight: 600;
@@ -232,32 +302,9 @@
             margin-bottom: 2rem;
         }
 
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(31, 169, 89, 0.15);
-        }
-
-        .btn {
-            font-weight: 500;
-            padding: 0.5rem 1.25rem;
-            border-radius: 8px;
-        }
-
-        .table {
-            vertical-align: middle;
-        }
-
-        .table th {
-            font-weight: 600;
-            background-color: var(--primary-light);
-            border: none;
+        /* Main Content Area */
+        main {
+            flex: 1;
         }
 
         /* SweetAlert2 Customization */
@@ -275,11 +322,6 @@
         
         .swal2-styled.swal2-cancel {
             background-color: #dc3545 !important;
-        }
-
-        /* Main Content Area */
-        main {
-            flex: 1;
         }
     </style>
     @stack('styles')
@@ -308,6 +350,83 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    
+    <script>
+        // Handle SweetAlert confirmations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delete confirmations
+            const deleteButtons = document.querySelectorAll('.delete-confirm');
+            
+            if (deleteButtons) {
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        const form = this.closest('form');
+                        const name = this.dataset.name || '';
+                        
+                        Swal.fire({
+                            title: 'هل أنت متأكد؟',
+                            text: `هل تريد حذف "${name}"؟`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#dc3545',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'نعم، احذف',
+                            cancelButtonText: 'إلغاء'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                form.submit();
+                            }
+                        });
+                    });
+                });
+            }
+            
+            // Form validation messages
+            const forms = document.querySelectorAll('.needs-validation');
+            
+            if (forms) {
+                Array.from(forms).forEach(form => {
+                    form.addEventListener('submit', event => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }
+            
+            // Initialize popovers
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+            if (popoverTriggerList) {
+                const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+            }
+            
+            // Initialize tooltips
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            if (tooltipTriggerList) {
+                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+            }
+        });
+
+        // Auto-dismiss alerts
+        window.setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            
+            if (alerts) {
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }
+        }, 5000);
+    </script>
     
     @stack('scripts')
 </body>
