@@ -15,13 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('subscription_id')->constrained('student_subscriptions');
             $table->string('transaction_id')->nullable();
-            $table->enum('payment_method', ['cash', 'bank_transfer', 'paymob', 'other'])->default('cash');
+            $table->enum('payment_method', ['cash', 'bank_transfer', 'tap', 'paymob', 'other'])->default('paymob');
             $table->decimal('amount', 10, 2);
-            $table->string('currency', 10)->default('EGP');
+            $table->string('currency', 10)->default('SAR');
             $table->enum('status', ['pending', 'success', 'failed', 'refunded'])->default('pending');
-            $table->string('paymob_order_id')->nullable();
-            $table->string('paymob_transaction_id')->nullable();
-            $table->text('paymob_response')->nullable();
+            $table->string('tap_charge_id')->nullable();
+            $table->text('tap_response')->nullable();
             $table->timestamps();
         });
     }

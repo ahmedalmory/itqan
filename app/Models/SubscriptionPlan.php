@@ -15,6 +15,7 @@ class SubscriptionPlan extends Model
      * @var array
      */
     protected $fillable = [
+        'type',
         'lessons_per_month',
         'price',
         'is_active',

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('end_date');
             $table->decimal('total_amount', 10, 2);
             $table->enum('payment_status', ['pending', 'paid', 'failed', 'refunded'])->default('pending');
-            $table->enum('payment_method', ['cash', 'bank_transfer', 'paymob', 'other'])->default('cash');
+            $table->enum('payment_method', ['cash', 'bank_transfer', 'paymob', 'tap', 'other'])->default('tap');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

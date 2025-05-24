@@ -16,11 +16,11 @@
                     <thead>
                         <tr>
                             <th>{{ t('id') }}</th>
-                            <th>{{ t('department') }}</th>
+                            <th>{{ t('circle') }}</th>
                             <th>{{ t('plan') }}</th>
                             <th>{{ t('amount') }}</th>
                             <th>{{ t('start_date') }}</th>
-                            <th>{{ t('expiry_date') }}</th>
+                            <th>{{ t('end_date') }}</th>
                             <th>{{ t('status') }}</th>
                             <th>{{ t('actions') }}</th>
                         </tr>
@@ -29,7 +29,7 @@
                         @forelse($subscriptions as $subscription)
                             <tr>
                                 <td>{{ $subscription->id }}</td>
-                                <td>{{ $subscription->department->name }}</td>
+                                <td>{{ $subscription->circle->name }} ({{ $subscription->circle->department->name }})</td>
                                 <td>
                                     @if($subscription->plan_type == 'monthly')
                                         {{ t('monthly_plan') }}
@@ -41,18 +41,18 @@
                                         {{ t('annual_plan') }}
                                     @endif
                                 </td>
-                                <td>{{ $subscription->amount }} {{ $subscription->currency }}</td>
+                                <td>{{ $subscription->total_amount }} {{ config('payment.currency') }}</td>
                                 <td>{{ $subscription->start_date->format('Y-m-d') }}</td>
-                                <td>{{ $subscription->expiry_date->format('Y-m-d') }}</td>
+                                <td>{{ $subscription->end_date->format('Y-m-d') }}</td>
                                 <td>
-                                    @if($subscription->status == 'active')
+                                    @if($subscription->is_active)
                                         <span class="badge bg-success">{{ t('active') }}</span>
-                                    @elseif($subscription->status == 'pending')
+                                    @elseif($subscription->payment_status == 'pending')
                                         <span class="badge bg-warning">{{ t('pending') }}</span>
-                                    @elseif($subscription->status == 'expired')
-                                        <span class="badge bg-danger">{{ t('expired') }}</span>
-                                    @elseif($subscription->status == 'cancelled')
-                                        <span class="badge bg-secondary">{{ t('cancelled') }}</span>
+                                    @elseif($subscription->payment_status == 'failed')
+                                        <span class="badge bg-danger">{{ t('failed') }}</span>
+                                    @elseif($subscription->payment_status == 'refunded')
+                                        <span class="badge bg-secondary">{{ t('refunded') }}</span>
                                     @endif
                                 </td>
                                 <td>

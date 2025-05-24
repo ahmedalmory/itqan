@@ -7,8 +7,10 @@ use App\Http\Controllers\Student\ProgressController;
 use App\Http\Controllers\Student\ReportController;
 use App\Http\Controllers\Student\SubscriptionController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Supervisor\CircleController as SupervisorCircleController;
 
 /*
@@ -184,15 +186,16 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('/profile/change-password', [ProfileController::class, 'showChangePasswordForm'])->name('profile.change-password');
     Route::put('/profile/change-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
     
-    // Student Subscriptions
-    Route::get('/subscriptions/create', [SubscriptionController::class, 'create'])->name('subscriptions.create');
-    Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
-    Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
-    Route::get('/subscriptions/{subscription}/payment', [SubscriptionController::class, 'showPayment'])->name('subscriptions.payment');
-    Route::post('/subscriptions/{subscription}/payment', [SubscriptionController::class, 'processPayment'])->name('subscriptions.process-payment');
-    Route::post('/subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
-    Route::get('/subscriptions/plans', [SubscriptionController::class, 'getPlans'])->name('subscriptions.plans');
-    Route::get('/subscriptions/renew', [SubscriptionController::class, 'renewForm'])->name('subscriptions.renew');
+    // Subscription routes
+    Route::prefix('subscriptions')->name('subscriptions.')->group(function () {
+        Route::get('/', [SubscriptionController::class, 'index'])->name('index');
+        Route::get('/create', [SubscriptionController::class, 'create'])->name('create');
+        Route::get('/plans', [SubscriptionController::class, 'getPlans'])->name('plans');
+        Route::post('/', [SubscriptionController::class, 'store'])->name('store');
+        Route::get('/{subscription}', [SubscriptionController::class, 'show'])->name('show');
+        Route::get('/{subscription}/payment', [SubscriptionController::class, 'showPayment'])->name('payment');
+        Route::post('/{subscription}/process-payment', [PaymentController::class, 'processPayment'])->name('process-payment');
+    });
 });
 
 // Supervisor routes
@@ -213,3 +216,12 @@ Route::middleware(['auth', 'role:supervisor'])->prefix('supervisor')->name('supe
     Route::delete('/circles/{circle}/students/{student}', [SupervisorCircleController::class, 'removeStudent'])->name('circles.students.remove');
     Route::get('/circles/{circle}/students/{student}', [SupervisorCircleController::class, 'viewStudent'])->name('circles.students.view');
 });
+
+// Payment Routes
+Route::prefix('payment')->group(function () {
+    Route::post('process/{subscription}', [PaymentController::class, 'processPayment'])->name('payment.process');
+    Route::get('callback', [PaymentController::class, 'handleCallback'])->name('payment.callback');
+});
+
+// Webhook Routes
+Route::post('webhooks/tap', [PaymentController::class, 'handleWebhook'])->name('webhooks.tap');

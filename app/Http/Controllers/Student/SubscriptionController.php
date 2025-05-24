@@ -8,6 +8,8 @@ use App\Models\PaymentSetting;
 use App\Models\PaymentTransaction;
 use App\Models\StudentSubscription;
 use App\Models\SubscriptionPlan;
+use App\Models\StudyCircle;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +17,8 @@ use Illuminate\Support\Str;
 
 class SubscriptionController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the student's subscriptions.
      *
@@ -24,7 +28,7 @@ class SubscriptionController extends Controller
     {
         $user = Auth::user();
         $subscriptions = StudentSubscription::where('student_id', $user->id)
-            ->with(['department', 'paymentTransactions'])
+            ->with(['circle.department', 'paymentTransactions'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
             
@@ -40,9 +44,14 @@ class SubscriptionController extends Controller
     {
         $user = Auth::user();
         
-        // Get departments that match the student's gender
-        $departments = Department::where('student_gender', $user->gender)
-            ->where('registration_open', true)
+        // Get circles that match the student's gender and age
+        $circles = StudyCircle::with('department')
+            ->whereHas('department', function ($query) use ($user) {
+                $query->where('student_gender', $user->gender)
+                    ->where('registration_open', true);
+            })
+            ->where('age_from', '<=', $user->age)
+            ->where('age_to', '>=', $user->age)
             ->get();
             
         // Check if payment is enabled
@@ -50,33 +59,39 @@ class SubscriptionController extends Controller
             ->where('is_active', true)
             ->value('setting_value') == '1';
             
-        return view('student.subscriptions.create', compact('departments', 'paymentEnabled'));
+        return view('student.subscriptions.create', compact('circles', 'paymentEnabled'));
     }
     
     /**
-     * Get subscription plans for a department.
+     * Get subscription plans for a circle.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getPlans(Request $request)
     {
-        $departmentId = $request->input('department_id');
-        
-        $department = Department::findOrFail($departmentId);
-        
-        $plans = [
-            ['id' => 'monthly', 'name' => t('monthly_plan'), 'price' => $department->monthly_fees],
-            ['id' => 'quarterly', 'name' => t('quarterly_plan'), 'price' => $department->quarterly_fees],
-            ['id' => 'biannual', 'name' => t('biannual_plan'), 'price' => $department->biannual_fees],
-            ['id' => 'annual', 'name' => t('annual_plan'), 'price' => $department->annual_fees],
-        ];
-        
-        return response()->json([
-            'plans' => array_filter($plans, function($plan) {
-                return !is_null($plan['price']);
-            })
-        ]);
+        try {
+            $circleId = $request->input('circle_id');
+            
+            // Validate circle exists
+            $circle = StudyCircle::findOrFail($circleId);
+            
+            // Get active subscription plans
+            $plans = SubscriptionPlan::where('is_active', true)
+                ->get()
+                ->map(function($plan) {
+                    return [
+                        'id' => $plan->type,
+                        'name' => t($plan->type . '_plan'),
+                        'price' => $plan->price,
+                        'lessons_per_month' => $plan->lessons_per_month
+                    ];
+                });
+            
+            return response()->json(['plans' => $plans]);
+        } catch (\Exception $e) {
+            return response()->json(['plans' => []], 500);
+        }
     }
     
     /**
@@ -88,23 +103,19 @@ class SubscriptionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'department_id' => 'required|exists:departments,id',
+            'circle_id' => 'required|exists:study_circles,id',
             'plan_type' => 'required|in:monthly,quarterly,biannual,annual',
         ]);
         
         $user = Auth::user();
-        $department = Department::findOrFail($validated['department_id']);
+        $circle = StudyCircle::with('department')->findOrFail($validated['circle_id']);
         
-        // Determine subscription amount based on plan type
-        $amount = match($validated['plan_type']) {
-            'monthly' => $department->monthly_fees,
-            'quarterly' => $department->quarterly_fees,
-            'biannual' => $department->biannual_fees,
-            'annual' => $department->annual_fees,
-            default => 0
-        };
-        
-        if (!$amount) {
+        // Get the subscription plan based on the plan type
+        $plan = SubscriptionPlan::where('type', $validated['plan_type'])
+            ->where('is_active', true)
+            ->first();
+            
+        if (!$plan) {
             return back()->with('error', t('invalid_subscription_plan'));
         }
         
@@ -127,28 +138,30 @@ class SubscriptionController extends Controller
             // Create subscription
             $subscription = StudentSubscription::create([
                 'student_id' => $user->id,
-                'department_id' => $department->id,
-                'plan_type' => $validated['plan_type'],
-                'amount' => $amount,
-                'currency' => 'EGP', // Default currency
+                'circle_id' => $circle->id,
+                'plan_id' => $plan->id,
+                'duration_months' => $duration,
                 'start_date' => $startDate,
-                'expiry_date' => $expiryDate,
-                'status' => 'pending', // Initial status is pending
+                'end_date' => $expiryDate,
+                'total_amount' => $plan->price,
+                'payment_status' => 'pending',
+                'payment_method' => 'tap',
+                'is_active' => false
             ]);
             
-            // Is payment is enabled, create a payment transaction
+            // Check if payment is enabled
             $paymentEnabled = PaymentSetting::where('setting_key', 'payment_enabled')
                 ->where('is_active', true)
                 ->value('setting_value') == '1';
                 
-            if ($paymentEnabled && $amount > 0) {
+            if ($paymentEnabled) {
                 // Create payment transaction
                 $transaction = PaymentTransaction::create([
                     'subscription_id' => $subscription->id,
                     'transaction_id' => 'TRX' . strtoupper(Str::random(8)),
-                    'payment_method' => 'paymob', // Default to Paymob
-                    'amount' => $amount,
-                    'currency' => 'EGP',
+                    'payment_method' => 'tap',
+                    'amount' => $plan->price,
+                    'currency' => config('payment.currency'),
                     'status' => 'pending',
                 ]);
                 
@@ -159,7 +172,10 @@ class SubscriptionController extends Controller
                     ->with('success', t('subscription_created_proceed_to_payment'));
             } else {
                 // If payment is not enabled, mark subscription as active
-                $subscription->update(['status' => 'active']);
+                $subscription->update([
+                    'payment_status' => 'paid',
+                    'is_active' => true
+                ]);
                 
                 DB::commit();
                 
@@ -183,7 +199,7 @@ class SubscriptionController extends Controller
     {
         $this->authorize('view', $subscription);
         
-        $subscription->load(['department', 'paymentTransactions']);
+        $subscription->load(['circle.department', 'paymentTransactions']);
         
         return view('student.subscriptions.show', compact('subscription'));
     }
@@ -330,9 +346,14 @@ class SubscriptionController extends Controller
                 ->with('info', t('no_active_subscription_found_create_new'));
         }
         
-        // Get departments that match the student's gender
-        $departments = Department::where('student_gender', $user->gender)
-            ->where('registration_open', true)
+        // Get circles that match the student's gender and age
+        $circles = StudyCircle::with('department')
+            ->whereHas('department', function ($query) use ($user) {
+                $query->where('student_gender', $user->gender)
+                    ->where('registration_open', true);
+            })
+            ->where('age_from', '<=', $user->age)
+            ->where('age_to', '>=', $user->age)
             ->get();
             
         // Check if payment is enabled
@@ -340,6 +361,6 @@ class SubscriptionController extends Controller
             ->where('is_active', true)
             ->value('setting_value') == '1';
             
-        return view('student.subscriptions.create', compact('departments', 'paymentEnabled', 'subscription'));
+        return view('student.subscriptions.create', compact('circles', 'paymentEnabled', 'subscription'));
     }
 } 

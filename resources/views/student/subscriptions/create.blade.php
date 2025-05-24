@@ -11,27 +11,27 @@
         <div class="card-body">
             @include('partials.alerts')
             
-            @if(count($departments) === 0)
+            @if(count($circles) === 0)
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    {{ t('no_departments_available') }}
+                    {{ t('no_circles_available') }}
                 </div>
             @else
                 <form action="{{ route('student.subscriptions.store') }}" method="POST" id="subscriptionForm">
                     @csrf
                     
                     <div class="mb-3">
-                        <label for="department_id" class="form-label">{{ t('select_department') }}</label>
-                        <select class="form-select @error('department_id') is-invalid @enderror" 
-                                id="department_id" name="department_id" required>
-                            <option value="">{{ t('select_department') }}</option>
-                            @foreach($departments as $department)
-                                <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
-                                    {{ $department->name }}
+                        <label for="circle_id" class="form-label">{{ t('select_circle') }}</label>
+                        <select class="form-select @error('circle_id') is-invalid @enderror" 
+                                id="circle_id" name="circle_id" required>
+                            <option value="">{{ t('select_circle') }}</option>
+                            @foreach($circles as $circle)
+                                <option value="{{ $circle->id }}" {{ old('circle_id') == $circle->id ? 'selected' : '' }}>
+                                    {{ $circle->name }} ({{ $circle->department->name }})
                                 </option>
                             @endforeach
                         </select>
-                        @error('department_id')
+                        @error('circle_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -52,7 +52,7 @@
                                 <h6 class="card-title">{{ t('subscription_details') }}</h6>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p class="mb-1"><strong>{{ t('department') }}:</strong> <span id="selectedDepartment"></span></p>
+                                        <p class="mb-1"><strong>{{ t('circle') }}:</strong> <span id="selectedCircle"></span></p>
                                         <p class="mb-1"><strong>{{ t('plan') }}:</strong> <span id="selectedPlan"></span></p>
                                     </div>
                                     <div class="col-md-6">
@@ -83,37 +83,46 @@
 @endsection
 
 @push('scripts')
+<!-- Make sure jQuery is loaded first -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#department_id').change(function() {
-            const departmentId = $(this).val();
-            if (!departmentId) {
+        console.log('Document ready');
+        
+        $('#circle_id').change(function() {
+            console.log('Circle changed');
+            const circleId = $(this).val();
+            console.log('Circle ID:', circleId);
+            
+            if (!circleId) {
                 $('#planSelectionContainer').hide();
                 $('#selectedPlanDetails').hide();
                 $('#subscribeBtn').prop('disabled', true);
                 return;
             }
             
-            // Get department name
-            const departmentName = $('#department_id option:selected').text();
-            $('#selectedDepartment').text(departmentName);
+            // Get circle name
+            const circleName = $('#circle_id option:selected').text();
+            $('#selectedCircle').text(circleName);
             
             // Reset plan selection
             $('#plan_type').val('');
             $('#subscribeBtn').prop('disabled', true);
             
-            // Fetch plans for the selected department
+            // Fetch plans for the selected circle
             $.ajax({
                 url: "{{ route('student.subscriptions.plans') }}",
                 type: 'GET',
-                data: { department_id: departmentId },
+                data: { circle_id: circleId },
                 dataType: 'json',
                 success: function(response) {
-                    const plans = response.plans;
+                    console.log('Plans response:', response);
+                    const plans = response.plans || [];
+                    
                     if (plans.length === 0) {
                         $('#planSelectionContainer').hide();
                         $('#selectedPlanDetails').hide();
-                        alert("{{ t('no_plans_available_for_department') }}");
+                        alert("{{ t('no_plans_available_for_circle') }}");
                         return;
                     }
                     
@@ -125,7 +134,8 @@
                                 <div class="card h-100 plan-card" data-plan="${plan.id}" data-name="${plan.name}" data-price="${plan.price}">
                                     <div class="card-body text-center">
                                         <h6 class="card-title">${plan.name}</h6>
-                                        <h5 class="text-primary">${plan.price} EGP</h5>
+                                        <h5 class="text-primary">${plan.price} {{ t('currency') }}</h5>
+                                        <p class="text-muted small mb-2">${plan.lessons_per_month} {{ t('lessons') }}/{{ t('month') }}</p>
                                         <button type="button" class="btn btn-sm btn-outline-primary select-plan-btn">
                                             {{ t('select') }}
                                         </button>
@@ -140,6 +150,7 @@
                     
                     // Handle plan selection
                     $('.select-plan-btn').click(function() {
+                        console.log('Plan selected');
                         const planCard = $(this).closest('.plan-card');
                         $('.plan-card').removeClass('border-primary');
                         planCard.addClass('border-primary');
@@ -148,23 +159,26 @@
                         const planName = planCard.data('name');
                         const planPrice = planCard.data('price');
                         
+                        console.log('Selected plan:', { planId, planName, planPrice });
+                        
                         $('#plan_type').val(planId);
                         $('#selectedPlan').text(planName);
-                        $('#selectedPrice').text(planPrice + ' EGP');
+                        $('#selectedPrice').text(planPrice + ' {{ t('currency') }}');
                         
                         $('#selectedPlanDetails').show();
                         $('#subscribeBtn').prop('disabled', false);
                     });
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('Error fetching plans:', { status, error, response: xhr.responseText });
                     alert("{{ t('error_fetching_plans') }}");
                 }
             });
         });
         
-        // Trigger change event if department was already selected (e.g. on form validation failure)
-        if ($('#department_id').val()) {
-            $('#department_id').trigger('change');
+        // Trigger change event if circle was already selected (e.g. on form validation failure)
+        if ($('#circle_id').val()) {
+            $('#circle_id').trigger('change');
         }
     });
 </script>

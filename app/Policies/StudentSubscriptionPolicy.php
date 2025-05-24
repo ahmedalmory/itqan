@@ -38,7 +38,9 @@ class StudentSubscriptionPolicy
         // Department admins can view subscriptions in their departments
         if ($user->role === 'department_admin') {
             return $user->adminDepartments()
-                ->where('departments.id', $subscription->department_id)
+                ->whereHas('circles', function ($query) use ($subscription) {
+                    $query->where('id', $subscription->circle_id);
+                })
                 ->exists();
         }
         
@@ -70,13 +72,15 @@ class StudentSubscriptionPolicy
         // Students can only update their own pending subscriptions
         if ($user->role === 'student') {
             return $user->id === $subscription->student_id && 
-                  $subscription->status === 'pending';
+                  $subscription->payment_status === 'pending';
         }
         
         // Department admins can update subscriptions in their departments
         if ($user->role === 'department_admin') {
             return $user->adminDepartments()
-                ->where('departments.id', $subscription->department_id)
+                ->whereHas('circles', function ($query) use ($subscription) {
+                    $query->where('id', $subscription->circle_id);
+                })
                 ->exists();
         }
         
@@ -101,7 +105,9 @@ class StudentSubscriptionPolicy
         // Department admins can delete subscriptions in their departments
         if ($user->role === 'department_admin') {
             return $user->adminDepartments()
-                ->where('departments.id', $subscription->department_id)
+                ->whereHas('circles', function ($query) use ($subscription) {
+                    $query->where('id', $subscription->circle_id);
+                })
                 ->exists();
         }
         

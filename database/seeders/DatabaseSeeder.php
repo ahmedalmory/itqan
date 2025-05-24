@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             CircleStudentSeeder::class,
             DailyReportSeeder::class,
             StudentPointSeeder::class,
+            SubscriptionPlanSeeder::class,
+            PaymentSettingsSeeder::class,
         ]);
     }
 }

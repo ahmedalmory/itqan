@@ -468,31 +468,7 @@
                     <p>{{ t('please_subscribe_to_continue') }}</p>
                 </div>
                 
-                @if(count($subscription_plans) > 0)
-                    <h5 class="mt-3 mb-3">{{ t('available_plans') }}</h5>
-                    <div class="row">
-                        @foreach($subscription_plans as $plan)
-                            <div class="col-md-6 col-lg-3 mb-3">
-                                <div class="card h-100 border-primary">
-                                    <div class="card-header bg-primary text-white text-center">
-                                        <h5 class="mb-0">{{ $plan->lessons_per_month }} {{ t('lessons') }}</h5>
-                                    </div>
-                                    <div class="card-body text-center">
-                                        <h3 class="card-title pricing-card-title">
-                                            {{ $plan->price }} {{ t('currency') }}
-                                            <small class="text-muted">/ {{ t('month') }}</small>
-                                        </h3>
-                                        <a href="{{ route('student.subscriptions.subscribe', ['plan' => $plan->id]) }}" class="btn btn-outline-primary mt-3">
-                                            {{ t('subscribe_now') }}
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <p>{{ t('no_plans_available') }}</p>
-                @endif
+
                 
                 <div class="mt-3">
                     <a href="{{ route('student.subscriptions.index') }}" class="btn btn-primary">

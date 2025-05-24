@@ -24,8 +24,12 @@
                                     <td>{{ $subscription->id }}</td>
                                 </tr>
                                 <tr>
+                                    <th>{{ t('circle') }}</th>
+                                    <td>{{ $subscription->circle->name }}</td>
+                                </tr>
+                                <tr>
                                     <th>{{ t('department') }}</th>
-                                    <td>{{ $subscription->department->name }}</td>
+                                    <td>{{ $subscription->circle->department->name }}</td>
                                 </tr>
                                 <tr>
                                     <th>{{ t('plan') }}</th>
@@ -43,27 +47,27 @@
                                 </tr>
                                 <tr>
                                     <th>{{ t('amount') }}</th>
-                                    <td>{{ $subscription->amount }} {{ $subscription->currency }}</td>
+                                    <td>{{ $subscription->total_amount }} {{ config('payment.currency') }}</td>
                                 </tr>
                                 <tr>
                                     <th>{{ t('start_date') }}</th>
                                     <td>{{ $subscription->start_date->format('Y-m-d') }}</td>
                                 </tr>
                                 <tr>
-                                    <th>{{ t('expiry_date') }}</th>
-                                    <td>{{ $subscription->expiry_date->format('Y-m-d') }}</td>
+                                    <th>{{ t('end_date') }}</th>
+                                    <td>{{ $subscription->end_date->format('Y-m-d') }}</td>
                                 </tr>
                                 <tr>
                                     <th>{{ t('status') }}</th>
                                     <td>
-                                        @if($subscription->status == 'active')
+                                        @if($subscription->is_active)
                                             <span class="badge bg-success">{{ t('active') }}</span>
-                                        @elseif($subscription->status == 'pending')
+                                        @elseif($subscription->payment_status == 'pending')
                                             <span class="badge bg-warning">{{ t('pending') }}</span>
-                                        @elseif($subscription->status == 'expired')
-                                            <span class="badge bg-danger">{{ t('expired') }}</span>
-                                        @elseif($subscription->status == 'cancelled')
-                                            <span class="badge bg-secondary">{{ t('cancelled') }}</span>
+                                        @elseif($subscription->payment_status == 'failed')
+                                            <span class="badge bg-danger">{{ t('failed') }}</span>
+                                        @elseif($subscription->payment_status == 'refunded')
+                                            <span class="badge bg-secondary">{{ t('refunded') }}</span>
                                         @endif
                                     </td>
                                 </tr>
