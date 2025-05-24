@@ -5,6 +5,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">{{ t('Daily Reports') }}</h1>
         <div>
+            <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="bi bi-upload"></i> {{ t('Import CSV') }}
+            </button>
             <a href="{{ route('admin.reports') }}" class="btn btn-outline-primary me-2">
                 <i class="bi bi-bar-chart"></i> {{ t('Monthly Summary') }}
             </a>
@@ -184,6 +187,40 @@
             {{ $reports->withQueryString()->links() }}
         </div>
     @endif
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">{{ t('Import Reports from CSV') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.reports.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="csv_file" class="form-label">{{ t('CSV File') }}</label>
+                        <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                        <div class="form-text">
+                            {{ t('Required columns: Student Name, Report Date, Memorization Parts, Revision Parts, Grade, Notes') }}
+                        </div>
+                    </div>
+                    
+                    @if($errors->has('csv_file'))
+                        <div class="alert alert-danger">
+                            {{ $errors->first('csv_file') }}
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('Close') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ t('Import') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @push('scripts')

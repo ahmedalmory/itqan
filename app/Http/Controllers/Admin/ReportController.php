@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\CsvController;
 use App\Models\DailyReport;
 use App\Models\Department;
 use App\Models\StudyCircle;
@@ -115,7 +116,7 @@ class ReportController extends Controller
         $query = DailyReport::with(['student', 'student.circles', 'student.circles.department'])
             ->orderBy('report_date', 'desc');
             
-        // Apply the same filters as in dailyReports method
+        // Apply filters
         if ($request->has('student_id') && $request->student_id) {
             $query->where('student_id', $request->student_id);
         }
@@ -142,7 +143,6 @@ class ReportController extends Controller
         
         $reports = $query->get();
         
-        // Generate CSV content
         $headers = [
             'Student Name',
             'Circle',
@@ -151,44 +151,23 @@ class ReportController extends Controller
             'Memorization Parts',
             'Revision Parts',
             'Grade',
-            'Memorization From',
-            'Memorization To',
             'Notes'
         ];
         
-        $callback = function() use ($reports, $headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
-            
-            foreach ($reports as $report) {
-                $circleName = $report->student && $report->student->circles->first() ? $report->student->circles->first()->name : 'N/A';
-                $departmentName = $report->student && $report->student->circles->first() && $report->student->circles->first()->department ? $report->student->circles->first()->department->name : 'N/A';
-                
-                $row = [
-                    $report->student ? $report->student->name : 'Unknown Student',
-                    $circleName,
-                    $departmentName,
-                    $report->report_date->format('Y-m-d'),
-                    $report->memorization_parts,
-                    $report->revision_parts,
-                    $report->grade,
-                    $report->memorization_from_surah . ':' . $report->memorization_from_verse,
-                    $report->memorization_to_surah . ':' . $report->memorization_to_verse,
-                    $report->notes
-                ];
-                
-                fputcsv($file, $row);
-            }
-            
-            fclose($file);
-        };
-        
-        $filename = 'daily_reports_' . date('Y-m-d') . '.csv';
-        
-        return Response::stream($callback, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
+        $data = $reports->map(function($report) {
+            return [
+                'Student Name' => $report->student ? $report->student->name : 'Unknown Student',
+                'Circle' => $report->student && $report->student->circles->first() ? $report->student->circles->first()->name : 'N/A',
+                'Department' => $report->student && $report->student->circles->first() && $report->student->circles->first()->department ? $report->student->circles->first()->department->name : 'N/A',
+                'Report Date' => $report->report_date->format('Y-m-d'),
+                'Memorization Parts' => $report->memorization_parts,
+                'Revision Parts' => $report->revision_parts,
+                'Grade' => $report->grade,
+                'Notes' => $report->notes
+            ];
+        });
+
+        return $this->exportToCsv($data, $headers, 'daily_reports_' . date('Y-m-d') . '.csv');
     }
 
     /**
@@ -390,5 +369,57 @@ class ReportController extends Controller
         } catch (\Exception $e) {
             return back()->withInput()->with('error', t('Failed to update report: ') . $e->getMessage());
         }
+    }
+
+    /**
+     * Get required headers for CSV import
+     */
+    protected function getRequiredHeaders(): array
+    {
+        return [
+            'Student Name',
+            'Report Date',
+            'Memorization Parts',
+            'Revision Parts',
+            'Grade',
+            'Notes'
+        ];
+    }
+
+    /**
+     * Get column mapping for CSV import
+     */
+    protected function getColumnMap(): array
+    {
+        return [
+            'Student Name' => 'student_name',
+            'Report Date' => 'report_date',
+            'Memorization Parts' => 'memorization_parts',
+            'Revision Parts' => 'revision_parts',
+            'Grade' => 'grade',
+            'Notes' => 'notes'
+        ];
+    }
+
+    /**
+     * Process a single record from CSV
+     */
+    protected function processRecord(array $record)
+    {
+        // Find student by name
+        $student = User::where('name', $record['student_name'])->first();
+        
+        if (!$student) {
+            throw new \Exception("Student not found: {$record['student_name']}");
+        }
+
+        return DailyReport::create([
+            'student_id' => $student->id,
+            'report_date' => $record['report_date'],
+            'memorization_parts' => $record['memorization_parts'],
+            'revision_parts' => $record['revision_parts'],
+            'grade' => $record['grade'],
+            'notes' => $record['notes']
+        ]);
     }
 } 

@@ -12,6 +12,7 @@ use Database\Seeders\Translations\StudentTranslationSeeder;
 use Database\Seeders\Translations\SupervisorTranslationSeeder;
 use Database\Seeders\Translations\TeacherTranslationSeeder;
 use Database\Seeders\Translations\UserTranslationSeeder;
+use Database\Seeders\Translations\CsvTranslationSeeder;
 use App\Models\Language;
 
 class TranslationSeeder extends Seeder
@@ -35,6 +36,7 @@ class TranslationSeeder extends Seeder
             StudentTranslationSeeder::class,
             TeacherTranslationSeeder::class,
             SupervisorTranslationSeeder::class,
+            CsvTranslationSeeder::class,
         ]);
         
         $this->command->info('All translation seeders have been run successfully!');

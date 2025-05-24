@@ -82,6 +82,8 @@ Route::middleware(['auth', 'role:super_admin,department_admin'])->prefix('admin'
     Route::resource('departments', \App\Http\Controllers\Admin\DepartmentController::class);
     
     // User management
+    Route::post('/users/import', [\App\Http\Controllers\Admin\UserController::class, 'import'])->name('users.import');
+    Route::get('/users/export', [\App\Http\Controllers\Admin\UserController::class, 'export'])->name('users.export');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     
     // Reports management
@@ -92,6 +94,7 @@ Route::middleware(['auth', 'role:super_admin,department_admin'])->prefix('admin'
     Route::get('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
     Route::get('/reports/{report}/edit', [\App\Http\Controllers\Admin\ReportController::class, 'edit'])->name('reports.edit');
     Route::put('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'update'])->name('reports.update');
+    Route::post('/reports/import', [\App\Http\Controllers\Admin\ReportController::class, 'import'])->name('reports.import');
     
     // Subscription management
     Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);

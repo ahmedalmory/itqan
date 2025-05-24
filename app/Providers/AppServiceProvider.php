@@ -7,6 +7,7 @@ use App\Models\Language;
 use App\Models\AppTranslation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useBootstrapFive();
         // Make sure migrations have run before trying to access database tables
         if (Schema::hasTable('languages') && Schema::hasTable('translations')) {
             // Load translations from database
