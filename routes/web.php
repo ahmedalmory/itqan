@@ -138,6 +138,7 @@ Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->name('teacher.')
     // Points Management
     Route::get('/points', [App\Http\Controllers\Teacher\PointsController::class, 'index'])->name('points.index');
     Route::post('/points', [App\Http\Controllers\Teacher\PointsController::class, 'update'])->name('points.update');
+    Route::post('/points/bulk', [App\Http\Controllers\Teacher\PointsController::class, 'bulkUpdate'])->name('points.bulk-update');
     Route::get('/points/student/{student}', [App\Http\Controllers\Teacher\PointsController::class, 'history'])->name('points.history');
     Route::get('/points/leaderboard', [App\Http\Controllers\Teacher\PointsController::class, 'leaderboard'])->name('points.leaderboard');
 });

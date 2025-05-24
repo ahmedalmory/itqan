@@ -70,11 +70,7 @@ class PointsController extends Controller
         // Format the students collection to include points data
         $students = $students->map(function($student) use ($selectedCircleId) {
             $points = $student->studentPoints->where('circle_id', $selectedCircleId)->first();
-            
-            $student->current_points = $points ? $points->points : 0;
             $student->total_points = $points ? $points->total_points : 0;
-            $student->points_id = $points ? $points->id : null;
-            
             return $student;
         })->sortByDesc('total_points')->values();
         
@@ -129,32 +125,42 @@ class PointsController extends Controller
                 ->withInput();
         }
         
-        // Find or create student points record
-        $studentPoints = StudentPoint::firstOrCreate(
-            [
+        DB::beginTransaction();
+        try {
+            // Find or create student points record
+            $studentPoints = StudentPoint::firstOrCreate(
+                [
+                    'student_id' => $request->student_id,
+                    'circle_id' => $request->circle_id,
+                ],
+                [
+                    'total_points' => 0,
+                ]
+            );
+            
+            // Create points history record
+            PointsHistory::create([
                 'student_id' => $request->student_id,
                 'circle_id' => $request->circle_id,
-            ],
-            [
-                'points' => 0,
-                'total_points' => 0,
-            ]
-        );
-        
-        // Create points history record
-        PointsHistory::create([
-            'student_id' => $request->student_id,
-            'circle_id' => $request->circle_id,
-            'points' => $request->points,
-            'reason' => $request->reason,
-        ]);
-        
-        // Update student points
-        $studentPoints->total_points += max(0, $request->points); // Only add positive points to total
-        $studentPoints->save();
-        
-        return redirect()->back()
-            ->with('success', t('points_updated_successfully'));
+                'points' => $request->points,
+                'action_type' => $request->points >= 0 ? 'add' : 'subtract',
+                'notes' => $request->reason,
+                'created_by' => $user->id,
+            ]);
+            
+            // Update student points
+            $studentPoints->total_points += $request->points;
+            $studentPoints->save();
+            
+            DB::commit();
+            return redirect()->back()
+                ->with('success', t('points_updated_successfully'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', t('error_updating_points'))
+                ->withInput();
+        }
     }
 
     /**
@@ -267,5 +273,87 @@ class PointsController extends Controller
             'circles' => $circles,
             'selectedCircleId' => $selectedCircleId,
         ]);
+    }
+
+    /**
+     * Update points for multiple students at once.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function bulkUpdate(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'circle_id' => 'required|exists:study_circles,id',
+            'points' => 'required|array',
+            'points.*' => 'required|integer',
+            'reason' => 'required|string|max:255',
+        ]);
+        
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+        
+        // Verify that the circle belongs to this teacher
+        $circle = StudyCircle::findOrFail($request->circle_id);
+        if ($circle->teacher_id !== $user->id) {
+            return redirect()->back()
+                ->with('error', t('unauthorized_action'))
+                ->withInput();
+        }
+        
+        DB::beginTransaction();
+        try {
+            foreach ($request->points as $studentId => $points) {
+                // Verify that the student is in the circle
+                $studentInCircle = DB::table('circle_students')
+                    ->where('circle_id', $request->circle_id)
+                    ->where('student_id', $studentId)
+                    ->exists();
+                    
+                if (!$studentInCircle) {
+                    continue; // Skip if student is not in circle
+                }
+                
+                // Find or create student points record
+                $studentPoints = StudentPoint::firstOrCreate(
+                    [
+                        'student_id' => $studentId,
+                        'circle_id' => $request->circle_id,
+                    ],
+                    [
+                        'total_points' => 0,
+                    ]
+                );
+                
+                // Create points history record
+                PointsHistory::create([
+                    'student_id' => $studentId,
+                    'circle_id' => $request->circle_id,
+                    'points' => $points,
+                    'action_type' => $points >= 0 ? 'add' : 'subtract',
+                    'notes' => $request->reason,
+                ]);
+                
+                // Update student points
+                $studentPoints->total_points += $points;
+                $studentPoints->save();
+            }
+            
+            DB::commit();
+            return redirect()->back()
+                ->with('success', t('points_updated_successfully'));
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', t('error_updating_points'))
+                ->withInput();
+        }
     }
 } 

@@ -217,6 +217,107 @@ class StudentTranslationSeeder extends AbstractTranslationSeeder
                 'ar' => 'المدفوعات',
                 'en' => 'Payments'
             ],
+            // Points Management
+            'points_management' => [
+                'ar' => 'إدارة النقاط',
+                'en' => 'Points Management'
+            ],
+            'manage_points' => [
+                'ar' => 'إدارة النقاط',
+                'en' => 'Manage Points'
+            ],
+            'bulk_assign_points' => [
+                'ar' => 'إضافة نقاط للجميع',
+                'en' => 'Bulk Assign Points'
+            ],
+            'bulk_assign_points_for_circle' => [
+                'ar' => 'إضافة نقاط لحلقة',
+                'en' => 'Bulk Assign Points for Circle'
+            ],
+            'quick_assign' => [
+                'ar' => 'إضافة سريعة',
+                'en' => 'Quick Assign'
+            ],
+            'points_for_all' => [
+                'ar' => 'نقاط للجميع',
+                'en' => 'Points for All'
+            ],
+            'apply_to_all' => [
+                'ar' => 'تطبيق على الجميع',
+                'en' => 'Apply to All'
+            ],
+            'student_name' => [
+                'ar' => 'اسم الطالب',
+                'en' => 'Student Name'
+            ],
+            'current_points' => [
+                'ar' => 'النقاط الحالية',
+                'en' => 'Current Points'
+            ],
+            'points_to_add' => [
+                'ar' => 'النقاط المراد إضافتها',
+                'en' => 'Points to Add'
+            ],
+            'save_changes' => [
+                'ar' => 'حفظ التغييرات',
+                'en' => 'Save Changes'
+            ],
+            'manage_points_for' => [
+                'ar' => 'إدارة نقاط',
+                'en' => 'Manage Points for'
+            ],
+            'points_help_text' => [
+                'ar' => 'أدخل قيمة موجبة لإضافة نقاط أو قيمة سالبة لخصم نقاط',
+                'en' => 'Enter a positive value to add points or a negative value to deduct points'
+            ],
+            'select_reason' => [
+                'ar' => 'اختر السبب',
+                'en' => 'Select Reason'
+            ],
+            'daily_memorization' => [
+                'ar' => 'الحفظ اليومي',
+                'en' => 'Daily Memorization'
+            ],
+            'participation' => [
+                'ar' => 'المشاركة',
+                'en' => 'Participation'
+            ],
+            'good_behavior' => [
+                'ar' => 'حسن السلوك',
+                'en' => 'Good Behavior'
+            ],
+            'extra_activities' => [
+                'ar' => 'أنشطة إضافية',
+                'en' => 'Extra Activities'
+            ],
+            'absence' => [
+                'ar' => 'الغياب',
+                'en' => 'Absence'
+            ],
+            'misconduct' => [
+                'ar' => 'سوء السلوك',
+                'en' => 'Misconduct'
+            ],
+            'other' => [
+                'ar' => 'أخرى',
+                'en' => 'Other'
+            ],
+            'points_updated_successfully' => [
+                'ar' => 'تم تحديث النقاط بنجاح',
+                'en' => 'Points updated successfully'
+            ],
+            'error_updating_points' => [
+                'ar' => 'حدث خطأ أثناء تحديث النقاط',
+                'en' => 'Error updating points'
+            ],
+            'unauthorized_action' => [
+                'ar' => 'غير مصرح بهذا الإجراء',
+                'en' => 'Unauthorized action'
+            ],
+            'student_not_in_circle' => [
+                'ar' => 'الطالب غير مسجل في هذه الحلقة',
+                'en' => 'Student is not in this circle'
+            ],
         ];
     }
 } 

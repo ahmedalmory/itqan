@@ -7,9 +7,16 @@
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">{{ t('manage_points') }}</h5>
-            <a href="{{ route('teacher.points.leaderboard') }}" class="btn btn-info btn-sm">
-                <i class="bi bi-trophy"></i> {{ t('leaderboard') }}
-            </a>
+            <div>
+                @if($selectedCircle && $students->isNotEmpty())
+                    <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#bulkPointsModal">
+                        <i class="bi bi-people"></i> {{ t('bulk_assign_points') }}
+                    </button>
+                @endif
+                <a href="{{ route('teacher.points.leaderboard') }}" class="btn btn-info btn-sm">
+                    <i class="bi bi-trophy"></i> {{ t('leaderboard') }}
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <div class="row mb-4">
@@ -94,8 +101,80 @@
 </div>
 
 @if($selectedCircle && $students->isNotEmpty())
+    <!-- Bulk Points Modal -->
+    <div class="modal fade" id="bulkPointsModal" tabindex="-1" aria-labelledby="bulkPointsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form action="{{ route('teacher.points.bulk-update') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="circle_id" value="{{ $selectedCircle->id }}">
+                    
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bulkPointsModalLabel">
+                            {{ t('bulk_assign_points_for_circle') }} {{ $selectedCircle->name }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="bulk-reason" class="form-label">{{ t('reason') }}</label>
+                            <select class="form-select" id="bulk-reason" name="reason" required>
+                                <option value="">{{ t('select_reason') }}</option>
+                                <option value="{{ t('daily_memorization') }}">{{ t('daily_memorization') }}</option>
+                                <option value="{{ t('participation') }}">{{ t('participation') }}</option>
+                                <option value="{{ t('good_behavior') }}">{{ t('good_behavior') }}</option>
+                                <option value="{{ t('extra_activities') }}">{{ t('extra_activities') }}</option>
+                                <option value="{{ t('absence') }}">{{ t('absence') }}</option>
+                                <option value="{{ t('misconduct') }}">{{ t('misconduct') }}</option>
+                                <option value="{{ t('other') }}">{{ t('other') }}</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">{{ t('quick_assign') }}</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="bulk-points-all" placeholder="{{ t('points_for_all') }}">
+                                <button type="button" class="btn btn-secondary" onclick="applyPointsToAll()">{{ t('apply_to_all') }}</button>
+                            </div>
+                            <small class="form-text text-muted">{{ t('points_help_text') }}</small>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>{{ t('student_name') }}</th>
+                                        <th>{{ t('total_points') }}</th>
+                                        <th>{{ t('points_to_add') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($students as $student)
+                                        <tr>
+                                            <td>{{ $student->name }}</td>
+                                            <td>{{ $student->total_points }}</td>
+                                            <td>
+                                                <input type="number" class="form-control points-input" name="points[{{ $student->id }}]" required>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('close') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ t('save_changes') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Points Modals -->
     @foreach($students as $student)
-        <!-- Points Modal for each student -->
         <div class="modal fade" id="pointsModal-{{ $student->id }}" tabindex="-1" aria-labelledby="pointsModalLabel-{{ $student->id }}" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -142,4 +221,16 @@
         </div>
     @endforeach
 @endif
+
+@push('scripts')
+<script>
+    function applyPointsToAll() {
+        const points = document.getElementById('bulk-points-all').value;
+        document.querySelectorAll('.points-input').forEach(input => {
+            input.value = points;
+        });
+    }
+</script>
+@endpush
+
 @endsection 
