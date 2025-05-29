@@ -8,6 +8,7 @@ use App\Models\DailyReport;
 use App\Models\Department;
 use App\Models\StudyCircle;
 use App\Models\User;
+use App\Models\Surah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
@@ -101,8 +102,9 @@ class ReportController extends Controller
         $students = User::where('role', 'student')->orderBy('name')->get();
         $circles = StudyCircle::orderBy('name')->get();
         $departments = Department::orderBy('name')->get();
+        $surahs = Surah::orderBy('id')->get();
         
-        return view('admin.reports.daily', compact('reports', 'students', 'circles', 'departments'));
+        return view('admin.reports.daily', compact('reports', 'students', 'circles', 'departments', 'surahs'));
     }
     
     /**
@@ -421,5 +423,53 @@ class ReportController extends Controller
             'grade' => $record['grade'],
             'notes' => $record['notes']
         ]);
+    }
+
+    /**
+     * Handle bulk report creation.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function bulkStore(Request $request)
+    {
+        $request->validate([
+            'reports' => 'required|array',
+            'reports.*.student_id' => 'required|exists:users,id',
+            'reports.*.report_date' => 'required|date',
+            'reports.*.memorization_parts' => 'required|numeric|min:0.25|max:30',
+            'reports.*.revision_parts' => 'required|numeric|min:0|max:30',
+            'reports.*.grade' => 'required|numeric|min:0|max:100',
+            'reports.*.memorization_from_surah' => 'required|exists:surahs,id',
+            'reports.*.memorization_from_verse' => 'required|integer|min:1',
+            'reports.*.memorization_to_surah' => 'required|exists:surahs,id',
+            'reports.*.memorization_to_verse' => 'required|integer|min:1',
+            'reports.*.notes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($request->reports as $reportData) {
+                // Check if report already exists for this student and date
+                $existingReport = DailyReport::where('student_id', $reportData['student_id'])
+                    ->where('report_date', $reportData['report_date'])
+                    ->first();
+
+                if ($existingReport) {
+                    // Update existing report
+                    $existingReport->update($reportData);
+                } else {
+                    // Create new report
+                    DailyReport::create($reportData);
+                }
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', t('reports_created_successfully'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', t('error_creating_reports') . ': ' . $e->getMessage());
+        }
     }
 } 

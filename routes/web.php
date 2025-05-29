@@ -93,6 +93,7 @@ Route::middleware(['auth', 'role:super_admin,department_admin'])->prefix('admin'
     Route::get('/reports/daily', [\App\Http\Controllers\Admin\ReportController::class, 'dailyReports'])->name('reports.daily');
     Route::get('/reports/export', [\App\Http\Controllers\Admin\ReportController::class, 'export'])->name('reports.export');
     Route::get('/reports/export-daily', [\App\Http\Controllers\Admin\ReportController::class, 'exportDaily'])->name('reports.export-daily');
+    Route::post('/reports/bulk', [\App\Http\Controllers\Admin\ReportController::class, 'bulkStore'])->name('reports.bulk-store');
     Route::get('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
     Route::get('/reports/{report}/edit', [\App\Http\Controllers\Admin\ReportController::class, 'edit'])->name('reports.edit');
     Route::put('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'update'])->name('reports.update');
@@ -137,6 +138,7 @@ Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->name('teacher.')
     // Daily Reports
     Route::get('/daily-reports', [App\Http\Controllers\Teacher\DailyReportController::class, 'index'])->name('daily-reports.index');
     Route::post('/daily-reports', [App\Http\Controllers\Teacher\DailyReportController::class, 'store'])->name('daily-reports.store');
+    Route::post('/daily-reports/bulk', [App\Http\Controllers\Teacher\DailyReportController::class, 'bulkStore'])->name('daily-reports.bulk-store');
     Route::delete('/daily-reports/{report}', [App\Http\Controllers\Teacher\DailyReportController::class, 'destroy'])->name('daily-reports.destroy');
     Route::get('/daily-reports/history', [App\Http\Controllers\Teacher\DailyReportController::class, 'history'])->name('daily-reports.history');
     
