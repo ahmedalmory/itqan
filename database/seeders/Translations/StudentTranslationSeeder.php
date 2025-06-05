@@ -58,7 +58,7 @@ class StudentTranslationSeeder extends AbstractTranslationSeeder
                 'en' => 'Total Memorization'
             ],
             'parts' => [
-                'ar' => 'أجزاء',
+                'ar' => 'أوجه',
                 'en' => 'Parts'
             ],
             'total_revision' => [

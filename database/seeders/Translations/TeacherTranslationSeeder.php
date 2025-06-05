@@ -197,7 +197,7 @@ class TeacherTranslationSeeder extends AbstractTranslationSeeder
             ],
             'memorization_parts' => [
                 'en' => 'Memorization Parts',
-                'ar' => 'أجزاء الحفظ'
+                'ar' => 'أوجه الحفظ'
             ],
             'notes' => [
                 'en' => 'Notes',

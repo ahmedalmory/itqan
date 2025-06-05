@@ -72,11 +72,11 @@ class DailyReportTranslationSeeder extends AbstractTranslationSeeder
 
             // Report Fields
             'memorization_parts' => [
-                'ar' => 'أجزاء الحفظ',
+                'ar' => 'أوجه الحفظ',
                 'en' => 'Memorization Parts'
             ],
             'revision_parts' => [
-                'ar' => 'أجزاء المراجعة',
+                'ar' => 'أوجه المراجعة',
                 'en' => 'Revision Parts'
             ],
             'from_surah' => [
