@@ -28,6 +28,21 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
+                                    <label for="national_id" class="form-label">{{ t('national_id') }}</label>
+                                    <input type="text" class="form-control @error('national_id') is-invalid @enderror" id="national_id" name="national_id"
+                                           value="{{ old('national_id') }}">
+                                    @error('national_id')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
                                     <label for="email" class="form-label">{{ t('email') }}</label>
                                     <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" required 
                                            value="{{ old('email') }}">
@@ -38,9 +53,6 @@
                                     @enderror
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="password" class="form-label">{{ t('password') }}</label>
@@ -52,15 +64,15 @@
                                     @enderror
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="password_confirmation" class="form-label">{{ t('confirm_password') }}</label>
                                     <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="phone" class="form-label">{{ t('phone') }}</label>
@@ -73,6 +85,9 @@
                                     @enderror
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="age" class="form-label">{{ t('age') }}</label>
@@ -85,9 +100,6 @@
                                     @enderror
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="gender" class="form-label">{{ t('gender') }}</label>
@@ -103,6 +115,9 @@
                                     @enderror
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="preferred_time" class="form-label">{{ t('preferred_time') }}</label>
@@ -121,23 +136,24 @@
                                     @enderror
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label for="country_id" class="form-label">{{ t('country') }}</label>
-                            <select class="form-select @error('country_id') is-invalid @enderror" id="country_id" name="country_id">
-                                <option value="">{{ t('select_country') }}</option>
-                                @foreach($countries as $country)
-                                    <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : '' }}>
-                                        {{ app()->getLocale() == 'ar' ? $country->alt_name : $country->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('country_id')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="country_id" class="form-label">{{ t('country') }}</label>
+                                    <select class="form-select @error('country_id') is-invalid @enderror" id="country_id" name="country_id">
+                                        <option value="">{{ t('select_country') }}</option>
+                                        @foreach($countries as $country)
+                                            <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : '' }}>
+                                                {{ app()->getLocale() == 'ar' ? $country->alt_name : $country->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('country_id')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
-                            @enderror
+                            </div>
                         </div>
 
                         <div class="d-grid mt-4">

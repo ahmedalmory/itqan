@@ -67,11 +67,11 @@
                 
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label for="memorization_parts" class="form-label">{{ t('Memorization Parts') }} <span class="text-danger">*</span></label>
+                        <label for="memorization_parts" class="form-label">{{ t('Memorization Parts') }}</label>
                         <input type="number" class="form-control @error('memorization_parts') is-invalid @enderror" 
                                id="memorization_parts" name="memorization_parts" 
                                value="{{ old('memorization_parts', $report->memorization_parts) }}"
-                               min="0" max="8" step="0.5" required>
+                               min="0" max="8" step="0.5">
                         @error('memorization_parts')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -136,11 +136,11 @@
                 
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label for="revision_parts" class="form-label">{{ t('Revision Parts') }} <span class="text-danger">*</span></label>
+                        <label for="revision_parts" class="form-label">{{ t('Revision Parts') }}</label>
                         <input type="number" class="form-control @error('revision_parts') is-invalid @enderror" 
                                id="revision_parts" name="revision_parts" 
                                value="{{ old('revision_parts', $report->revision_parts) }}"
-                               min="0" max="20" step="0.5" required>
+                               min="0" max="20" step="0.5">
                         @error('revision_parts')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

@@ -64,11 +64,11 @@ class ReportController extends Controller
             'report_date' => 'required|date|before_or_equal:today',
             'memorization_parts' => 'nullable|numeric|min:0|max:30|required_without:revision_parts',
             'revision_parts' => 'nullable|numeric|min:0|max:30|required_without:memorization_parts',
-            'memorization_from_surah_id' => 'required|exists:surahs,id',
-            'memorization_from_verse' => 'required|integer|min:1',
-            'memorization_to_surah_id' => 'required|exists:surahs,id',
-            'memorization_to_verse' => 'required|integer|min:1',
-            'grade' => 'required|numeric|min:0|max:100',
+            'memorization_from_surah_id' => 'nullable|exists:surahs,id',
+            'memorization_from_verse' => 'nullable|integer|min:1',
+            'memorization_to_surah_id' => 'nullable|exists:surahs,id',
+            'memorization_to_verse' => 'nullable|integer|min:1',
+            'grade' => 'nullable|numeric|min:0|max:100',
             'notes' => 'nullable|string|max:1000',
         ]);
         $user = Auth::user();

@@ -321,16 +321,16 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="number" name="reports[0][memorization_parts]" class="form-control" min="0.25" max="30" step="0.25" required>
+                                            <input type="number" name="reports[0][memorization_parts]" class="form-control" min="0.25" max="30" step="0.25">
                                         </td>
                                         <td>
-                                            <input type="number" name="reports[0][revision_parts]" class="form-control" min="0" max="30" step="0.25" required>
+                                            <input type="number" name="reports[0][revision_parts]" class="form-control" min="0" max="30" step="0.25">
                                         </td>
                                         <td>
-                                            <input type="number" name="reports[0][grade]" class="form-control" min="0" max="100" required>
+                                            <input type="number" name="reports[0][grade]" class="form-control" min="0" max="100">
                                         </td>
                                         <td>
-                                            <select name="reports[0][memorization_from_surah]" class="form-select" required>
+                                            <select name="reports[0][memorization_from_surah]" class="form-select">
                                                 <option value="">{{ t('select_surah') }}</option>
                                                 @foreach($surahs as $surah)
                                                     <option value="{{ $surah->id }}">{{ $surah->name }}</option>
@@ -338,10 +338,10 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="number" name="reports[0][memorization_from_verse]" class="form-control" min="1" required>
+                                            <input type="number" name="reports[0][memorization_from_verse]" class="form-control" min="1">
                                         </td>
                                         <td>
-                                            <select name="reports[0][memorization_to_surah]" class="form-select" required>
+                                            <select name="reports[0][memorization_to_surah]" class="form-select">
                                                 <option value="">{{ t('select_surah') }}</option>
                                                 @foreach($surahs as $surah)
                                                     <option value="{{ $surah->id }}">{{ $surah->name }}</option>
@@ -349,7 +349,7 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="number" name="reports[0][memorization_to_verse]" class="form-control" min="1" required>
+                                            <input type="number" name="reports[0][memorization_to_verse]" class="form-control" min="1">
                                         </td>
                                         <td>
                                             <input type="text" name="reports[0][notes]" class="form-control">

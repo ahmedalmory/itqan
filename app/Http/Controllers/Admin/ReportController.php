@@ -346,8 +346,8 @@ class ReportController extends Controller
         $validated = $request->validate([
             'student_id' => 'required|exists:users,id',
             'report_date' => 'required|date',
-            'memorization_parts' => 'required|numeric|min:0|max:8',
-            'revision_parts' => 'required|numeric|min:0|max:20',
+            'memorization_parts' => 'nullable|numeric|min:0|max:8|required_without:revision_parts',
+            'revision_parts' => 'nullable|numeric|min:0|max:20|required_without:memorization_parts',
             'memorization_from_surah_id' => 'nullable|exists:surahs,id',
             'memorization_from_verse' => 'nullable|numeric|min:1',
             'memorization_to_surah_id' => 'nullable|exists:surahs,id',
@@ -356,7 +356,7 @@ class ReportController extends Controller
             'revision_from_verse' => 'nullable|numeric|min:1',
             'revision_to_surah_id' => 'nullable|exists:surahs,id',
             'revision_to_verse' => 'nullable|numeric|min:1',
-            'grade' => 'required|numeric|min:0|max:100',
+            'grade' => 'nullable|numeric|min:0|max:100',
             'notes' => 'nullable|string|max:1000',
         ]);
         
@@ -437,13 +437,13 @@ class ReportController extends Controller
             'reports' => 'required|array',
             'reports.*.student_id' => 'required|exists:users,id',
             'reports.*.report_date' => 'required|date',
-            'reports.*.memorization_parts' => 'required|numeric|min:0.25|max:30',
-            'reports.*.revision_parts' => 'required|numeric|min:0|max:30',
-            'reports.*.grade' => 'required|numeric|min:0|max:100',
-            'reports.*.memorization_from_surah' => 'required|exists:surahs,id',
-            'reports.*.memorization_from_verse' => 'required|integer|min:1',
-            'reports.*.memorization_to_surah' => 'required|exists:surahs,id',
-            'reports.*.memorization_to_verse' => 'required|integer|min:1',
+            'reports.*.memorization_parts' => 'nullable|numeric|min:0.25|max:30|required_without:reports.*.revision_parts',
+            'reports.*.revision_parts' => 'nullable|numeric|min:0|max:30|required_without:reports.*.memorization_parts',
+            'reports.*.grade' => 'nullable|numeric|min:0|max:100',
+            'reports.*.memorization_from_surah' => 'nullable|exists:surahs,id',
+            'reports.*.memorization_from_verse' => 'nullable|integer|min:1',
+            'reports.*.memorization_to_surah' => 'nullable|exists:surahs,id',
+            'reports.*.memorization_to_verse' => 'nullable|integer|min:1',
             'reports.*.notes' => 'nullable|string|max:1000',
         ]);
 

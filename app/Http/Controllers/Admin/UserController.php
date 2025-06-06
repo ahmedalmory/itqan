@@ -14,6 +14,7 @@ use App\Models\Country;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use App\Traits\CsvOperations;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -239,6 +240,7 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:20',
             'gender' => 'nullable|string|in:male,female',
             'age' => 'nullable|integer|min:0', // Added age validation
+            'national_id' => 'nullable|string|max:50',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string|in:admin,supervisor,teacher,student',
             'study_circle_id' => 'nullable|required_if:role,student|exists:study_circles,id',
@@ -302,6 +304,7 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:20',
             'gender' => 'required|string|in:male,female',
             'age' => 'nullable|integer|min:0', // Added age validation
+            'national_id' => 'nullable|string|max:50',
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|string|in:admin,supervisor,teacher,student',
             'study_circle_id' => 'nullable|required_if:role,student|exists:study_circles,id',

@@ -70,7 +70,6 @@
                             <tr>
                                 <th>{{ t('date') }}</th>
                                 <th>{{ t('student') }}</th>
-                                <th>{{ t('circle') }}</th>
                                 <th>{{ t('memorization') }}</th>
                                 <th>{{ t('grade') }}</th>
                                 <th>{{ t('actions') }}</th>
@@ -94,13 +93,6 @@
                                             @endif
                                             <div>{{ $report->student->name }}</div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        @if($report->circle)
-                                            {{ $report->circle->name }}
-                                        @else
-                                            <span class="text-muted">{{ t('unknown_circle') }}</span>
-                                        @endif
                                     </td>
                                     <td>
                                         {{ $report->memorization_parts }} {{ t('pages') }}

@@ -24,10 +24,11 @@ class User extends Authenticatable
         'phone',
         'age',
         'gender',
+        'national_id',
         'role',
-        'preferred_time',
-        'country_id',
         'is_active',
+        'country_id',
+        'preferred_time',
         'department_id',
         'study_circle_id',
     ];

@@ -112,6 +112,8 @@
                                         <th>{{ t('Name') }}</th>
                                         <th>{{ t('Email') }}</th>
                                         <th>{{ t('Phone') }}</th>
+                                        <th>{{ t('Age') }}</th>
+                                        <th>{{ t('preferred_time') }}</th>
                                         <th>{{ t('Action') }}</th>
                                     </tr>
                                 </thead>
@@ -121,6 +123,8 @@
                                             <td>{{ $student->name }}</td>
                                             <td>{{ $student->email }}</td>
                                             <td>{{ $student->phone }}</td>
+                                            <td>{{ $student->age }}</td>
+                                            <td>{{ t($student->preferred_time) }}</td>
                                             <td>
                                                 <form action="{{ route('admin.circles.store-student', $circle) }}" method="POST">
                                                     @csrf
@@ -172,4 +176,4 @@
 </script>
 @endpush
 
-@endsection 
+@endsection

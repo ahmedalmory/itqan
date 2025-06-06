@@ -119,16 +119,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="bulk-reason" class="form-label">{{ t('reason') }}</label>
-                            <select class="form-select" id="bulk-reason" name="reason" required>
-                                <option value="">{{ t('select_reason') }}</option>
-                                <option value="{{ t('daily_memorization') }}">{{ t('daily_memorization') }}</option>
-                                <option value="{{ t('participation') }}">{{ t('participation') }}</option>
-                                <option value="{{ t('good_behavior') }}">{{ t('good_behavior') }}</option>
-                                <option value="{{ t('extra_activities') }}">{{ t('extra_activities') }}</option>
-                                <option value="{{ t('absence') }}">{{ t('absence') }}</option>
-                                <option value="{{ t('misconduct') }}">{{ t('misconduct') }}</option>
-                                <option value="{{ t('other') }}">{{ t('other') }}</option>
-                            </select>
+                            <input type="text" class="form-control" id="bulk-reason" name="reason" required>
                         </div>
                         
                         <div class="mb-3">
@@ -147,6 +138,7 @@
                                         <th>{{ t('student_name') }}</th>
                                         <th>{{ t('total_points') }}</th>
                                         <th>{{ t('points_to_add') }}</th>
+                                        <th>{{ t('reason') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -156,6 +148,9 @@
                                             <td>{{ $student->total_points }}</td>
                                             <td>
                                                 <input type="number" class="form-control points-input" name="points[{{ $student->id }}]" required>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control reason-input" name="reasons[{{ $student->id }}]" required>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -199,16 +194,7 @@
                             
                             <div class="mb-3">
                                 <label for="reason_{{ $student->id }}" class="form-label">{{ t('reason') }}</label>
-                                <select class="form-select" id="reason_{{ $student->id }}" name="reason" required>
-                                    <option value="">{{ t('select_reason') }}</option>
-                                    <option value="{{ t('daily_memorization') }}">{{ t('daily_memorization') }}</option>
-                                    <option value="{{ t('participation') }}">{{ t('participation') }}</option>
-                                    <option value="{{ t('good_behavior') }}">{{ t('good_behavior') }}</option>
-                                    <option value="{{ t('extra_activities') }}">{{ t('extra_activities') }}</option>
-                                    <option value="{{ t('absence') }}">{{ t('absence') }}</option>
-                                    <option value="{{ t('misconduct') }}">{{ t('misconduct') }}</option>
-                                    <option value="{{ t('other') }}">{{ t('other') }}</option>
-                                </select>
+                                <input type="text" class="form-control" id="reason_{{ $student->id }}" name="reason" required>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -226,8 +212,12 @@
 <script>
     function applyPointsToAll() {
         const points = document.getElementById('bulk-points-all').value;
+        const reason = document.getElementById('bulk-reason').value;
         document.querySelectorAll('.points-input').forEach(input => {
             input.value = points;
+        });
+        document.querySelectorAll('.reason-input').forEach(input => {
+            input.value = reason;
         });
     }
 </script>

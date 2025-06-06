@@ -81,6 +81,10 @@ class UserTranslationSeeder extends AbstractTranslationSeeder
                 'ar' => 'غير محدد',
                 'en' => 'Not specified'
             ],
+            'national_id' => [
+                'ar' => 'رقم الهوية',
+                'en' => 'National ID'
+            ],
             'Email Verified' => [
                 'ar' => 'البريد الإلكتروني مؤكد',
                 'en' => 'Email Verified'

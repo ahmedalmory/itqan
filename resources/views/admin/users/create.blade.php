@@ -26,6 +26,16 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
+                                <label for="national_id" class="form-label">{{ t('national_id') }}</label>
+                                <input type="text" class="form-control @error('national_id') is-invalid @enderror" id="national_id" name="national_id" value="{{ old('national_id') }}">
+                                @error('national_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label for="email" class="form-label">{{ t('Email') }} <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
                                 @error('email')

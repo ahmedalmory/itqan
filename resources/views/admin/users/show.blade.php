@@ -119,6 +119,20 @@
                                                 <p class="mb-0">{{ $user->updated_at->format('M d, Y h:i A') }}</p>
                                             </div>
                                         </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="form-label text-muted">{{ t('Name') }}</label>
+                                                <p class="mb-0">{{ $user->name }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="form-label text-muted">{{ t('national_id') }}</label>
+                                                <p class="mb-0">{{ $user->national_id ?? t('Not provided') }}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

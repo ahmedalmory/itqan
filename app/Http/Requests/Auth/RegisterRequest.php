@@ -29,6 +29,7 @@ class RegisterRequest extends FormRequest
             'phone' => ['required', 'string', 'max:20'],
             'age' => ['required', 'integer', 'min:5', 'max:100'],
             'gender' => ['required', 'string', 'in:male,female'],
+            'national_id' => ['nullable', 'string', 'max:50'],
             'role' => ['sometimes', 'string', 'in:student'],  // Only allow student role for public registration
             'preferred_time' => ['sometimes', 'string', 'in:after_fajr,after_dhuhr,after_asr,after_maghrib,after_isha'],
             'country_id' => ['sometimes', 'exists:countries,id'],

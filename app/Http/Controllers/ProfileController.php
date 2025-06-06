@@ -44,6 +44,7 @@ class ProfileController extends Controller
             'country_id' => 'required|exists:countries,id',
             'age' => 'required|integer|min:5|max:100',
             'gender' => 'required|in:male,female',
+            'national_id' => 'nullable|string|max:50',
         ]);
         
         try {
