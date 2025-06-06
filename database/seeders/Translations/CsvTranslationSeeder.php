@@ -145,6 +145,10 @@ class CsvTranslationSeeder extends AbstractTranslationSeeder
                 'ar' => 'رقم الهاتف',
                 'en' => 'Phone'
             ],
+            'Circle' => [
+                'ar' => 'الحلقة',
+                'en' => 'Circle'
+            ],
             'Role' => [
                 'ar' => 'الدور',
                 'en' => 'Role'

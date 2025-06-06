@@ -214,7 +214,7 @@
                                 {{ t('Required columns') }}: {{ t('Name') }}, {{ t('Email') }}
                             </div>
                             <div class="form-text mb-2">
-                                {{ t('Optional columns') }}: {{ t('Phone') }}, {{ t('Role') }}, {{ t('Country') }}
+                                {{ t('Optional columns') }}: {{ t('Phone') }}, {{ t('Role') }}, {{ t('Country') }}, {{ t('Circle') }}
                             </div>
                             <div class="alert alert-info">
                                 <h6 class="alert-heading">{{ t('Default values used for missing fields') }}:</h6>

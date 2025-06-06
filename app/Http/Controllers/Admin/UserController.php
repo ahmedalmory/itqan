@@ -12,9 +12,9 @@ use Illuminate\Validation\Rule;
 use App\Http\Controllers\CsvController;
 use App\Models\Country;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use App\Traits\CsvOperations;
-use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -56,7 +56,8 @@ class UserController extends Controller
             'Phone' => 'phone',
             'Role' => 'role',
             'Country' => 'country_name',
-            'Password' => 'password'
+            'Password' => 'password',
+            'Circle' => 'circle_name',
         ];
     }
 
@@ -78,7 +79,7 @@ class UserController extends Controller
         }
 
         // Create user
-        return User::create([
+        $newUser = User::create([
             'name' => $record['name'],
             'email' => $record['email'],
             'phone' => $record['phone'],
@@ -86,6 +87,24 @@ class UserController extends Controller
             'country_id' => $country->id,
             'password' => Hash::make($record['password'])
         ]);
+
+        // Handle circle assignment if provided and user is a student
+        if (isset($record['circle_name']) && !empty($record['circle_name']) && $record['role'] === 'student') {
+            $circle = StudyCircle::firstOrCreate(
+                ['name' => $record['circle_name']],
+                [
+                    'description' => 'Circle created from CSV import',
+                    'department_id' => Department::first()->id, // Default to first department
+                    'age_from' => 12, // Default values
+                    'age_to' => 25
+                ]
+            );
+            
+            // Add student to circle
+            $circle->students()->attach($newUser->id);
+        }
+
+        return $newUser;
     }
 
     /**
@@ -93,7 +112,7 @@ class UserController extends Controller
      */
     public function export(Request $request)
     {
-        $query = User::with('country');
+        $query = User::with(['country', 'circles']);
 
         // Apply filters
         if ($request->has('role') && $request->role) {
@@ -122,6 +141,7 @@ class UserController extends Controller
             'Phone',
             'Role',
             'Country',
+            'Circle',
             'Created At'
         ];
 
@@ -132,6 +152,12 @@ class UserController extends Controller
             fputcsv($file, $headers);
 
             foreach ($users as $user) {
+                // Get circle name for students
+                $circleName = '';
+                if ($user->role === 'student' && $user->circles->isNotEmpty()) {
+                    $circleName = $user->circles->first()->name;
+                }
+
                 $row = [
                     'ID' => $user->id,
                     'Name' => $user->name,
@@ -139,6 +165,7 @@ class UserController extends Controller
                     'Phone' => $user->phone,
                     'Role' => $user->role,
                     'Country' => $user->country ? $user->country->name : 'N/A',
+                    'Circle' => $circleName,
                     'Created At' => $user->created_at->format('Y-m-d H:i:s')
                 ];
                 fputcsv($file, array_values($row));
@@ -366,7 +393,7 @@ class UserController extends Controller
             return back()->with('error', t('Please select a CSV file to import'));
         }
 
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'csv_file' => 'required|file|mimes:csv,txt|max:2048'
         ]);
 
@@ -447,7 +474,7 @@ class UserController extends Controller
                     );
 
                     // Create user
-                    User::create([
+                    $newUser = User::create([
                         'name' => $userData['Name'],
                         'email' => $userData['Email'],
                         'phone' => $userData['Phone'],
@@ -456,6 +483,22 @@ class UserController extends Controller
                         'password' => Hash::make($userData['password']),
                         'is_active' => $userData['is_active']
                     ]);
+
+                    // Handle circle assignment if provided and user is a student
+                    if (isset($userData['Circle']) && !empty($userData['Circle']) && $userData['Role'] === 'student') {
+                        $circle = StudyCircle::firstOrCreate(
+                            ['name' => $userData['Circle']],
+                            [
+                                'description' => 'Circle created from CSV import',
+                                'department_id' => Department::first()->id, // Default to first department
+                                'age_from' => 12, // Default values
+                                'age_to' => 25
+                            ]
+                        );
+                        
+                        // Add student to circle
+                        $circle->students()->attach($newUser->id);
+                    }
 
                     $successCount++;
                 } catch (\Exception $e) {
