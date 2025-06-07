@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('points');
             $table->enum('action_type', ['add', 'subtract', 'reset']);
             $table->text('notes')->nullable();
+            $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
         });
     }

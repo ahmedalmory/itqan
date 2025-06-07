@@ -11,6 +11,9 @@
     <a class="nav-link {{ request()->is('admin/users*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
         <i class="bi bi-person"></i> {{ t('users') }}
     </a>
+    <a class="nav-link {{ request()->is('admin/points*') ? 'active' : '' }}" href="{{ route('admin.points.index') }}">
+        <i class="bi bi-star"></i> {{ t('points') }}
+    </a>
     <a class="nav-link {{ request()->is('admin/reports*') ? 'active' : '' }}" href="{{ route('admin.reports') }}">
         <i class="bi bi-file-earmark-text"></i> {{ t('reports') }}
     </a>

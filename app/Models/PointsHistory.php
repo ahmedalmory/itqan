@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class PointsHistory extends Model
 {
@@ -29,8 +30,19 @@ class PointsHistory extends Model
         'points',
         'action_type',
         'notes',
-        'created_by',
     ];
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
+    {
+        static::creating(function ($pointsHistory) {
+            if (!isset($pointsHistory->created_by)) {
+                $pointsHistory->created_by = Auth::id();
+            }
+        });
+    }
     
     /**
      * Get the student that the points history belongs to.

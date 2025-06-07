@@ -58,6 +58,12 @@
                                 <i class="bi bi-circle me-1"></i> {{ t('study_circles') }}
                             </a>
                         </li>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link rounded-pill px-3 {{ request()->is('admin/points*') ? 'active' : '' }}" 
+                               href="{{ route('admin.points.index') }}">
+                                <i class="bi bi-star me-1"></i> {{ t('points') }}
+                            </a>
+                        </li>
                         
                         <!-- Language Management -->
                         <li class="nav-item dropdown mx-1">

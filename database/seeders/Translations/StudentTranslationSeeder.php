@@ -416,7 +416,7 @@ class StudentTranslationSeeder extends AbstractTranslationSeeder
                 'en' => 'View All Subscription Options'
             ],
             'points' => [
-                'ar' => 'نقطة',
+                'ar' => 'النقاط',
                 'en' => 'Points'
             ],
             'back_to_subscriptions' => [

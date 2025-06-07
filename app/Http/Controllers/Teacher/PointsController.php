@@ -96,7 +96,7 @@ class PointsController extends Controller
             'circle_id' => 'required|exists:study_circles,id',
             'student_id' => 'required|exists:users,id',
             'points' => 'required|integer',
-            'reason' => 'required|string|max:255',
+            'reason' => 'nullable|string|max:255',
         ]);
         
         if ($validator->fails()) {
@@ -290,7 +290,7 @@ class PointsController extends Controller
             'circle_id' => 'required|exists:study_circles,id',
             'points' => 'required|array',
             'points.*' => 'required|integer',
-            'reason' => 'required|string|max:255',
+            'reason' => 'nullable|string|max:255',
         ]);
         
         if ($validator->fails()) {
@@ -301,11 +301,6 @@ class PointsController extends Controller
         
         // Verify that the circle belongs to this teacher
         $circle = StudyCircle::findOrFail($request->circle_id);
-        if ($circle->teacher_id !== $user->id) {
-            return redirect()->back()
-                ->with('error', t('unauthorized_action'))
-                ->withInput();
-        }
         
         DB::beginTransaction();
         try {

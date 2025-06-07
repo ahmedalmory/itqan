@@ -336,7 +336,7 @@
             </div>
         @endif
         
-        {{-- @include('partials.alerts') --}}
+        @include('partials.alerts')
         
         @yield('content')
     </main>

@@ -88,6 +88,13 @@ Route::middleware(['auth', 'role:super_admin,department_admin'])->prefix('admin'
     Route::get('/users/export', [\App\Http\Controllers\Admin\UserController::class, 'export'])->name('users.export');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     
+    // Points Management
+    Route::get('/points', [\App\Http\Controllers\Admin\PointsController::class, 'index'])->name('points.index');
+    Route::post('/points', [\App\Http\Controllers\Admin\PointsController::class, 'update'])->name('points.update');
+    Route::post('/points/bulk', [\App\Http\Controllers\Admin\PointsController::class, 'bulkUpdate'])->name('points.bulk-update');
+    Route::get('/points/student/{student}', [\App\Http\Controllers\Admin\PointsController::class, 'history'])->name('points.history');
+    Route::get('/points/leaderboard', [\App\Http\Controllers\Admin\PointsController::class, 'leaderboard'])->name('points.leaderboard');
+    
     // Reports management
     Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports');
     Route::get('/reports/daily', [\App\Http\Controllers\Admin\ReportController::class, 'dailyReports'])->name('reports.daily');
@@ -121,6 +128,20 @@ Route::middleware(['auth', 'role:super_admin,department_admin'])->prefix('admin'
     // Settings
     Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings');
     Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'store'])->name('settings.store');
+});
+
+// Department Admin routes
+Route::middleware(['auth', 'role:department_admin'])->prefix('department-admin')->name('department-admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('department-admin.dashboard');
+    })->name('dashboard');
+    
+    // Points Management
+    Route::get('/points', [\App\Http\Controllers\DepartmentAdmin\PointsController::class, 'index'])->name('points.index');
+    Route::post('/points', [\App\Http\Controllers\DepartmentAdmin\PointsController::class, 'update'])->name('points.update');
+    Route::post('/points/bulk', [\App\Http\Controllers\DepartmentAdmin\PointsController::class, 'bulkUpdate'])->name('points.bulk-update');
+    Route::get('/points/student/{student}', [\App\Http\Controllers\DepartmentAdmin\PointsController::class, 'history'])->name('points.history');
+    Route::get('/points/leaderboard', [\App\Http\Controllers\DepartmentAdmin\PointsController::class, 'leaderboard'])->name('points.leaderboard');
 });
 
 // Teacher routes
