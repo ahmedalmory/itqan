@@ -150,7 +150,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item px-3 py-2 rounded-3 mx-1" href="{{ url('/change-password') }}">
+                                <a class="dropdown-item px-3 py-2 rounded-3 mx-1" href="{{ route('password.change') }}">
                                     <i class="bi bi-key me-2"></i> {{ t('change_password') }}
                                 </a>
                             </li>

@@ -7,6 +7,7 @@ use App\Models\StudyCircle;
 use App\Models\User;
 use App\Models\StudentPoint;
 use App\Models\PointsHistory;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -229,14 +230,21 @@ class PointsController extends BasePointsController
     {
         $user = Auth::user();
         
-        // Get selected circle
+        // Get selected department and circle
+        $selectedDepartmentId = $request->input('department_id');
         $selectedCircleId = $request->input('circle_id');
         
         // Build query for student points
-        $pointsQuery = StudentPoint::with(['student', 'circle']);
+        $pointsQuery = StudentPoint::with(['student', 'circle.department']);
             
         if ($selectedCircleId) {
             $pointsQuery->where('circle_id', $selectedCircleId);
+        }
+        
+        if ($selectedDepartmentId) {
+            $pointsQuery->whereHas('circle', function($query) use ($selectedDepartmentId) {
+                $query->where('department_id', $selectedDepartmentId);
+            });
         }
         
         if ($user->role === 'department_admin') {
@@ -250,8 +258,12 @@ class PointsController extends BasePointsController
         $leaderboard = $pointsQuery->orderBy('total_points', 'desc')
             ->paginate(20);
             
-        // Get circles based on user role
+        // Get circles based on user role and selected department
         $circlesQuery = StudyCircle::query();
+        
+        if ($selectedDepartmentId) {
+            $circlesQuery->where('department_id', $selectedDepartmentId);
+        }
         
         if ($user->role === 'department_admin') {
             $departmentIds = $user->adminDepartments()->pluck('departments.id');
@@ -259,11 +271,20 @@ class PointsController extends BasePointsController
         }
         
         $circles = $circlesQuery->get();
+
+        // Get departments based on user role
+        if ($user->role === 'department_admin') {
+            $departments = $user->adminDepartments;
+        } else {
+            $departments = Department::all();
+        }
         
         return view('admin.points.leaderboard', [
             'leaderboard' => $leaderboard,
             'circles' => $circles,
             'selectedCircleId' => $selectedCircleId,
+            'departments' => $departments,
+            'selectedDepartment' => $selectedDepartmentId,
         ]);
     }
 } 

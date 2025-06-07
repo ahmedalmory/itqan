@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\StudentPoint;
 use App\Models\CircleStudent;
 use App\Models\PointsHistory;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class StudentPointSeeder extends Seeder
@@ -14,6 +15,13 @@ class StudentPointSeeder extends Seeder
      */
     public function run(): void
     {
+        // Get the super admin user
+        $superAdmin = User::where('role', 'super_admin')->first();
+        if (!$superAdmin) {
+            $this->command->error('Super admin user not found. Please run UserSeeder first.');
+            return;
+        }
+
         // Get all students in circles
         $circleStudents = CircleStudent::all();
 
@@ -67,6 +75,7 @@ class StudentPointSeeder extends Seeder
                     'notes' => $notes,
                     'created_at' => $timestamp,
                     'updated_at' => $timestamp,
+                    'created_by' => $superAdmin->id,
                 ]);
             }
         }

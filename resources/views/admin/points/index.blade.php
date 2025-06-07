@@ -1,55 +1,65 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h1 class="mb-4">{{ t('points_management') }}</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">{{ t('Points Management') }}</h1>
+        <div>
+            @if($selectedCircle && $students->isNotEmpty())
+                <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#bulkPointsModal">
+                    <i class="bi bi-people"></i> {{ t('Bulk Assign Points') }}
+                </button>
+            @endif
+            <a href="{{ route('admin.points.leaderboard') }}" class="btn btn-outline-primary">
+                <i class="bi bi-trophy"></i> {{ t('View Leaderboard') }}
+            </a>
+        </div>
+    </div>
 
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">{{ t('manage_points') }}</h5>
-            <div>
-                @if($selectedCircle && $students->isNotEmpty())
-                    <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#bulkPointsModal">
-                        <i class="bi bi-people"></i> {{ t('bulk_assign_points') }}
-                    </button>
-                @endif
-                <a href="{{ route('admin.points.leaderboard') }}" class="btn btn-info btn-sm">
-                    <i class="bi bi-trophy"></i> {{ t('leaderboard') }}
-                </a>
-            </div>
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light py-3">
+            <form method="GET" action="{{ route('admin.points.index') }}" class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <select name="circle_id" class="form-select" onchange="this.form.submit()">
+                        <option value="">{{ t('Select Circle') }}</option>
+                        @foreach($circles as $circle)
+                            <option value="{{ $circle->id }}" {{ request('circle_id') == $circle->id ? 'selected' : '' }}>
+                                {{ $circle->name }} ({{ $circle->students_count }} {{ t('students') }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </form>
         </div>
         <div class="card-body">
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <form action="{{ route('admin.points.index') }}" method="GET" class="d-flex">
-                        <select name="circle_id" class="form-select me-2">
-                            @foreach($circles as $circle)
-                                <option value="{{ $circle->id }}" @if($selectedCircle && $selectedCircle->id == $circle->id) selected @endif>
-                                    {{ $circle->name }} ({{ $circle->students_count }} {{ t('students') }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="btn btn-primary">{{ t('select') }}</button>
-                    </form>
-                </div>
-            </div>
-
             @if(!$selectedCircle)
                 <div class="alert alert-info">
-                    {{ t('select_circle_to_manage_points') }}
+                    {{ t('Please select a circle to manage points') }}
                 </div>
             @elseif($students->isEmpty())
-                <div class="alert alert-warning">
-                    {{ t('no_students_in_selected_circle') }}
+                <div class="alert alert-info">
+                    {{ t('No students found in this circle') }}
                 </div>
             @else
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>{{ t('student') }}</th>
-                                <th>{{ t('total_points') }}</th>
-                                <th>{{ t('actions') }}</th>
+                                <th>{{ t('Student') }}</th>
+                                <th>{{ t('Total Points') }}</th>
+                                <th>{{ t('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -57,11 +67,14 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            @if($student->avatar)
-                                                <img src="{{ $student->avatar }}" alt="{{ $student->name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                            @if($student->profile_photo)
+                                                <img src="{{ asset('storage/' . $student->profile_photo) }}" 
+                                                     class="rounded-circle me-2" style="width: 40px; height: 40px;" 
+                                                     alt="{{ $student->name }}">
                                             @else
-                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
-                                                    {{ strtoupper(substr($student->name, 0, 1)) }}
+                                                <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center" 
+                                                     style="width: 40px; height: 40px; color: white;">
+                                                    {{ substr($student->name, 0, 1) }}
                                                 </div>
                                             @endif
                                             <div>
@@ -76,15 +89,14 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-primary btn-sm" 
+                                        <button type="button" class="btn btn-primary btn-sm me-2" 
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#pointsModal-{{ $student->id }}">
-                                            <i class="bi bi-plus-circle"></i> {{ t('add_points') }}
+                                            <i class="bi bi-plus-circle"></i> {{ t('Add Points') }}
                                         </button>
-                                        
                                         <a href="{{ route('admin.points.history', $student->id) }}" 
-                                           class="btn btn-info btn-sm">
-                                            <i class="bi bi-clock-history"></i> {{ t('history') }}
+                                           class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-clock-history"></i> {{ t('History') }}
                                         </a>
                                     </td>
                                 </tr>
@@ -107,42 +119,47 @@
                     <input type="hidden" name="circle_id" value="{{ $selectedCircle->id }}">
                     
                     <div class="modal-header">
-                        <h5 class="modal-title" id="bulkPointsModalLabel">{{ t('bulk_assign_points') }}</h5>
+                        <h5 class="modal-title" id="bulkPointsModalLabel">
+                            {{ t('Bulk Assign Points for Circle') }} {{ $selectedCircle->name }}
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="bulk-reason" class="form-label">{{ t('reason') }}</label>
-                            <input type="text" class="form-control" id="bulk-reason" name="reason">
+                            <label for="bulk-reason" class="form-label">{{ t('Reason') }}</label>
+                            <input type="text" class="form-control" id="bulk-reason" name="reason" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">{{ t('quick_assign') }}</label>
+                            <label class="form-label">{{ t('Quick Assign') }}</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" id="bulk-points-all" placeholder="{{ t('points_for_all') }}">
-                                <button type="button" class="btn btn-secondary" onclick="applyPointsToAll()">{{ t('apply_to_all') }}</button>
+                                <input type="number" class="form-control" id="bulk-points-all" placeholder="{{ t('Points for All') }}">
+                                <button type="button" class="btn btn-secondary" onclick="applyPointsToAll()">{{ t('Apply to All') }}</button>
                             </div>
-                            <small class="form-text text-muted">{{ t('points_help_text') }}</small>
+                            <small class="form-text text-muted">{{ t('Use negative values to subtract points') }}</small>
                         </div>
                         
                         <div class="table-responsive">
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ t('student') }}</th>
-                                        <th>{{ t('points') }}</th>
+                                        <th>{{ t('Student Name') }}</th>
+                                        <th>{{ t('Total Points') }}</th>
+                                        <th>{{ t('Points to Add') }}</th>
+                                        <th>{{ t('Reason') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($students as $student)
                                         <tr>
                                             <td>{{ $student->name }}</td>
+                                            <td>{{ $student->total_points }}</td>
                                             <td>
-                                                <input type="number" 
-                                                       class="form-control points-input" 
-                                                       name="points[{{ $student->id }}]" 
-                                                       required>
+                                                <input type="number" class="form-control points-input" name="points[{{ $student->id }}]" required>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control reason-input" name="reasons[{{ $student->id }}]" required>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -152,8 +169,8 @@
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('cancel') }}</button>
-                        <button type="submit" class="btn btn-primary">{{ t('save') }}</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('Close') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ t('Save Changes') }}</button>
                     </div>
                 </form>
             </div>
@@ -172,26 +189,26 @@
                         
                         <div class="modal-header">
                             <h5 class="modal-title" id="pointsModalLabel-{{ $student->id }}">
-                                {{ t('manage_points_for') }} {{ $student->name }}
+                                {{ t('Manage Points for') }} {{ $student->name }}
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="points_{{ $student->id }}" class="form-label">{{ t('points') }}</label>
+                                <label for="points_{{ $student->id }}" class="form-label">{{ t('Points') }}</label>
                                 <input type="number" class="form-control" id="points_{{ $student->id }}" 
                                        name="points" required>
-                                <div class="form-text">{{ t('points_help_text') }}</div>
+                                <div class="form-text">{{ t('Use negative values to subtract points') }}</div>
                             </div>
                             
                             <div class="mb-3">
-                                <label for="reason_{{ $student->id }}" class="form-label">{{ t('reason') }}</label>
+                                <label for="reason_{{ $student->id }}" class="form-label">{{ t('Reason') }}</label>
                                 <input type="text" class="form-control" id="reason_{{ $student->id }}" name="reason" required>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('cancel') }}</button>
-                            <button type="submit" class="btn btn-primary">{{ t('save') }}</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('Cancel') }}</button>
+                            <button type="submit" class="btn btn-primary">{{ t('Save') }}</button>
                         </div>
                     </form>
                 </div>

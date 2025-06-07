@@ -46,7 +46,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">{{ t('todays_attendance') }}</h5>
-                    <a href="{{ route('teacher.daily-reports.index') }}" class="btn btn-sm btn-primary">{{ t('add_reports') }}</a>
+                    <a href="{{ route('teacher.daily-reports.index', ['circle_id' => $circles->first()->id ?? null]) }}" class="btn btn-sm btn-primary">{{ t('add_reports') }}</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -183,7 +183,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('teacher.daily-reports.index') }}" class="btn btn-primary">
+                        <a href="{{ route('teacher.daily-reports.index', ['circle_id' => $circles->first()->id ?? null]) }}" class="btn btn-primary">
                             <i class="bi bi-journal-check"></i> {{ t('add_daily_reports') }}
                         </a>
                         <a href="{{ route('teacher.circles.index') }}" class="btn btn-info">

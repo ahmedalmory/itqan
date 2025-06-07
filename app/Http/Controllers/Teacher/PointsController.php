@@ -46,7 +46,7 @@ class PointsController extends Controller
         // If no circle is selected or circle doesn't belong to teacher, redirect
         if (!$selectedCircleId || !$circles->contains('id', $selectedCircleId)) {
             if ($circles->isNotEmpty()) {
-                return redirect()->route('teacher.points.index', ['circle_id' => $circles->first()->id]);
+                return redirect()->route('teacher.points.index', ['circle_id' => $circles->first()->id ?? null]);
             }
             
             return view('teacher.points.index', [
@@ -255,7 +255,7 @@ class PointsController extends Controller
         
         // Build query for student points
         $pointsQuery = StudentPoint::whereIn('circle_id', $teacherCircles)
-            ->with(['student', 'circle']);
+            ->with(['student', 'circle.department']);
             
         if ($selectedCircleId) {
             $pointsQuery->where('circle_id', $selectedCircleId);
