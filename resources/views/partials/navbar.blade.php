@@ -64,6 +64,12 @@
                                 <i class="bi bi-star me-1"></i> {{ t('points') }}
                             </a>
                         </li>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link rounded-pill px-3 {{ request()->is('admin/rewards*') ? 'active' : '' }}" 
+                               href="{{ route('admin.rewards.index') }}">
+                                <i class="bi bi-gift me-1"></i> {{ t('Rewards') }}
+                            </a>
+                        </li>
                         
                         <!-- Language Management -->
                         <li class="nav-item dropdown mx-1">
@@ -100,11 +106,23 @@
                                 <i class="bi bi-people me-1"></i> {{ t('my_circles') }}
                             </a>
                         </li>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link rounded-pill px-3 {{ request()->is('teacher/rewards*') ? 'active' : '' }}" 
+                               href="{{ route('teacher.rewards.index') }}">
+                                <i class="bi bi-gift me-1"></i> {{ t('Rewards') }}
+                            </a>
+                        </li>
                     @elseif(Auth::user()->isSupervisor())
                         <li class="nav-item mx-1">
                             <a class="nav-link rounded-pill px-3 {{ request()->is('supervisor/dashboard') ? 'active' : '' }}" 
                                href="{{ route('supervisor.dashboard') }}">
                                 <i class="bi bi-speedometer2 me-1"></i> {{ t('dashboard') }}
+                            </a>
+                        </li>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link rounded-pill px-3 {{ request()->is('supervisor/rewards*') ? 'active' : '' }}" 
+                               href="{{ route('supervisor.rewards.index') }}">
+                                <i class="bi bi-gift me-1"></i> {{ t('Rewards') }}
                             </a>
                         </li>
                     @elseif(Auth::user()->isStudent())
@@ -124,6 +142,12 @@
                             <a class="nav-link rounded-pill px-3 {{ request()->is('student/browse-circles') ? 'active' : '' }}" 
                                href="{{ route('student.circles.browse') }}">
                                 <i class="bi bi-search me-1"></i> {{ t('browse_circles') }}
+                            </a>
+                        </li>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link rounded-pill px-3 {{ request()->is('student/rewards*') ? 'active' : '' }}" 
+                               href="{{ route('student.rewards.index') }}">
+                                <i class="bi bi-gift me-1"></i> {{ t('Rewards') }}
                             </a>
                         </li>
                     @endif

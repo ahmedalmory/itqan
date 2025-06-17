@@ -125,6 +125,14 @@ Route::middleware(['auth', 'role:super_admin,department_admin'])->prefix('admin'
     Route::post('/translations/import', [\App\Http\Controllers\Admin\TranslationController::class, 'import'])->name('translations.import');
     Route::get('/translations/export', [\App\Http\Controllers\Admin\TranslationController::class, 'export'])->name('translations.export');
     
+    // Rewards Management
+    Route::resource('rewards', \App\Http\Controllers\Admin\RewardController::class);
+    
+    // Reward Redemptions Management
+    Route::get('/reward-redemptions', [\App\Http\Controllers\Admin\RewardRedemptionController::class, 'index'])->name('reward-redemptions.index');
+    Route::get('/reward-redemptions/{redemption}', [\App\Http\Controllers\Admin\RewardRedemptionController::class, 'show'])->name('reward-redemptions.show');
+    Route::put('/reward-redemptions/{redemption}/status', [\App\Http\Controllers\Admin\RewardRedemptionController::class, 'updateStatus'])->name('reward-redemptions.update-status');
+    
     // Settings
     Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings');
     Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'store'])->name('settings.store');
@@ -169,6 +177,12 @@ Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->name('teacher.')
     Route::post('/points/bulk', [App\Http\Controllers\Teacher\PointsController::class, 'bulkUpdate'])->name('points.bulk-update');
     Route::get('/points/student/{student}', [App\Http\Controllers\Teacher\PointsController::class, 'history'])->name('points.history');
     Route::get('/points/leaderboard', [App\Http\Controllers\Teacher\PointsController::class, 'leaderboard'])->name('points.leaderboard');
+    
+    // Rewards viewing (read-only)
+    Route::prefix('rewards')->name('rewards.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Teacher\RewardController::class, 'index'])->name('index');
+        Route::get('/{reward}', [\App\Http\Controllers\Teacher\RewardController::class, 'show'])->name('show');
+    });
 });
 
 // Student routes
@@ -219,6 +233,14 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
         Route::get('/{subscription}/payment', [SubscriptionController::class, 'showPayment'])->name('payment');
         Route::post('/{subscription}/process-payment', [PaymentController::class, 'processPayment'])->name('process-payment');
     });
+    
+    // Rewards routes
+    Route::prefix('rewards')->name('rewards.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Student\RewardController::class, 'index'])->name('index');
+        Route::get('/{reward}', [\App\Http\Controllers\Student\RewardController::class, 'show'])->name('show');
+        Route::post('/{reward}/redeem', [\App\Http\Controllers\Student\RewardController::class, 'redeem'])->name('redeem');
+        Route::get('/my/redemptions', [\App\Http\Controllers\Student\RewardController::class, 'redemptions'])->name('redemptions');
+    });
 });
 
 // Supervisor routes
@@ -238,6 +260,12 @@ Route::middleware(['auth', 'role:supervisor'])->prefix('supervisor')->name('supe
     Route::post('/circles/{circle}/students', [SupervisorCircleController::class, 'addStudent'])->name('circles.students.add');
     Route::delete('/circles/{circle}/students/{student}', [SupervisorCircleController::class, 'removeStudent'])->name('circles.students.remove');
     Route::get('/circles/{circle}/students/{student}', [SupervisorCircleController::class, 'viewStudent'])->name('circles.students.view');
+    
+    // Rewards viewing (read-only)
+    Route::prefix('rewards')->name('rewards.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Supervisor\RewardController::class, 'index'])->name('index');
+        Route::get('/{reward}', [\App\Http\Controllers\Supervisor\RewardController::class, 'show'])->name('show');
+    });
 });
 
 // Payment Routes

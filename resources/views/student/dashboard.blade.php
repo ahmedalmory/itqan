@@ -479,6 +479,48 @@
         </div>
     </div>
 
+    <!-- Rewards Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-gift me-2"></i>{{ t('Rewards & Prizes') }}
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <p class="mb-3">{{ t('Redeem your points for amazing rewards!') }}</p>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="stats-card bg-gradient text-white" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 1rem; border-radius: 10px;">
+                                <div class="icon"><i class="bi bi-coins"></i></div>
+                                <div class="value">{{ number_format($total_points) }}</div>
+                                <div class="label">{{ t('Available Points') }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stats-card bg-gradient text-white" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); padding: 1rem; border-radius: 10px;">
+                                <div class="icon"><i class="bi bi-award"></i></div>
+                                <div class="value">{{ Auth::user()->rewardRedemptions()->count() }}</div>
+                                <div class="label">{{ t('Rewards Earned') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('student.rewards.index') }}" class="btn btn-success">
+                            <i class="bi bi-gift me-1"></i>{{ t('Browse Rewards') }}
+                        </a>
+                        <a href="{{ route('student.rewards.redemptions') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-clock-history me-1"></i>{{ t('My Redemptions') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         @foreach($days as $day)
             <div class="col-lg-3 col-md-6 mb-4">

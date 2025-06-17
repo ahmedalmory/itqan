@@ -187,4 +187,20 @@ class User extends Authenticatable
     {
         return $this->belongsTo(StudyCircle::class, 'study_circle_id');
     }
+    
+    /**
+     * Get the student's reward redemptions.
+     */
+    public function rewardRedemptions()
+    {
+        return $this->hasMany(RewardRedemption::class, 'student_id');
+    }
+    
+    /**
+     * Get the student's total points balance across all circles.
+     */
+    public function getTotalPointsBalanceAttribute(): int
+    {
+        return $this->studentPoints()->sum('total_points');
+    }
 }
