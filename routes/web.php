@@ -164,12 +164,13 @@ Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->name('teacher.')
     Route::put('/circles/{circle}', [App\Http\Controllers\Teacher\CircleController::class, 'update'])->name('circles.update');
     Route::get('/circles/{circle}/students', [App\Http\Controllers\Teacher\CircleController::class, 'students'])->name('circles.students');
     
-    // Daily Reports
-    Route::get('/daily-reports', [App\Http\Controllers\Teacher\DailyReportController::class, 'index'])->name('daily-reports.index');
+    // Daily Reports - Calendar is now the default view
+    Route::get('/daily-reports', [App\Http\Controllers\Teacher\DailyReportController::class, 'calendar'])->name('daily-reports.index');
     Route::post('/daily-reports', [App\Http\Controllers\Teacher\DailyReportController::class, 'store'])->name('daily-reports.store');
     Route::post('/daily-reports/bulk', [App\Http\Controllers\Teacher\DailyReportController::class, 'bulkStore'])->name('daily-reports.bulk-store');
     Route::delete('/daily-reports/{report}', [App\Http\Controllers\Teacher\DailyReportController::class, 'destroy'])->name('daily-reports.destroy');
     Route::get('/daily-reports/history', [App\Http\Controllers\Teacher\DailyReportController::class, 'history'])->name('daily-reports.history');
+    Route::get('/daily-reports/get-details', [App\Http\Controllers\Teacher\DailyReportController::class, 'getReportDetails'])->name('daily-reports.get-details');
     
     // Points Management
     Route::get('/points', [App\Http\Controllers\Teacher\PointsController::class, 'index'])->name('points.index');

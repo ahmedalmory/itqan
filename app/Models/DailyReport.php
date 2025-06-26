@@ -24,6 +24,10 @@ class DailyReport extends Model
         'memorization_from_verse',
         'memorization_to_surah',
         'memorization_to_verse',
+        'revision_from_surah',
+        'revision_from_verse',
+        'revision_to_surah',
+        'revision_to_verse',
         'notes',
     ];
     
@@ -61,5 +65,37 @@ class DailyReport extends Model
     public function toSurah()
     {
         return $this->belongsTo(Surah::class, 'memorization_to_surah');
+    }
+
+    /**
+     * Get the starting surah for memorization.
+     */
+    public function memorization_from_surah()
+    {
+        return $this->belongsTo(Surah::class, 'memorization_from_surah');
+    }
+
+    /**
+     * Get the ending surah for memorization.
+     */
+    public function memorization_to_surah()
+    {
+        return $this->belongsTo(Surah::class, 'memorization_to_surah');
+    }
+
+    /**
+     * Get the starting surah for revision.
+     */
+    public function revision_from_surah()
+    {
+        return $this->belongsTo(Surah::class, 'revision_from_surah');
+    }
+
+    /**
+     * Get the ending surah for revision.
+     */
+    public function revision_to_surah()
+    {
+        return $this->belongsTo(Surah::class, 'revision_to_surah');
     }
 } 

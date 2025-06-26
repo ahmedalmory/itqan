@@ -7,9 +7,11 @@
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">{{ t('daily_reports_history') }}</h5>
-            <a href="{{ route('teacher.daily-reports.index') }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-circle"></i> {{ t('manage_daily_reports') }}
-            </a>
+            <div>
+                <a href="{{ route('teacher.daily-reports.index') }}" class="btn btn-success btn-sm">
+                    <i class="bi bi-calendar-month"></i> {{ t('back_to_calendar') }}
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <!-- Filters -->
@@ -71,6 +73,7 @@
                                 <th>{{ t('date') }}</th>
                                 <th>{{ t('student') }}</th>
                                 <th>{{ t('memorization') }}</th>
+                                <th>{{ t('revision') }}</th>
                                 <th>{{ t('grade') }}</th>
                                 <th>{{ t('actions') }}</th>
                             </tr>
@@ -95,8 +98,24 @@
                                         </div>
                                     </td>
                                     <td>
-                                        {{ $report->memorization_parts }} {{ t('pages') }}
-                                        ({{ $report->fromSurah->name ?? 'N/A' }} - {{ $report->toSurah->name ?? 'N/A' }})
+                                        @if($report->memorization_parts > 0)
+                                            {{ $report->memorization_parts }} {{ t('pages') }}
+                                            @if($report->fromSurah || $report->toSurah)
+                                                <br><small class="text-muted">({{ $report->fromSurah->name ?? 'N/A' }} - {{ $report->toSurah->name ?? 'N/A' }})</small>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">{{ t('no_memorization') }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($report->revision_parts > 0)
+                                            {{ $report->revision_parts }} {{ t('pages') }}
+                                            @if($report->revision_from_surah || $report->revision_to_surah)
+                                                <br><small class="text-muted">({{ $report->revision_from_surah->name ?? 'N/A' }} - {{ $report->revision_to_surah->name ?? 'N/A' }})</small>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">{{ t('no_revision') }}</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ $report->grade >= 80 ? 'success' : ($report->grade >= 60 ? 'warning' : 'danger') }}">

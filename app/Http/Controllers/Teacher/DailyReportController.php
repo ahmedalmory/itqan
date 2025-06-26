@@ -32,29 +32,6 @@ class DailyReportController extends Controller
      * @param Request $request
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index(Request $request)
-    {
-        $user = Auth::user();
-        $circles = StudyCircle::where('teacher_id', $user->id)->get();
-        $selectedCircle = null;
-        $students = collect();
-        $date = $request->get('date', now()->format('Y-m-d'));
-        $surahs = Surah::orderBy('id')->get();
-        
-        if ($request->has('circle_id')) {
-            $selectedCircle = $circles->firstWhere('id', $request->circle_id);
-            if ($selectedCircle) {
-                $students = $selectedCircle->students()
-                    ->with(['dailyReports' => function($query) use ($date) {
-                        $query->where('report_date', $date);
-                    }])
-                    ->get();
-            }
-        }
-        
-        return view('teacher.daily-reports.index', compact('circles', 'selectedCircle', 'students', 'date', 'surahs'));
-    }
-
     /**
      * Store a newly created daily report.
      *
@@ -75,6 +52,10 @@ class DailyReportController extends Controller
             'memorization_to_surah' => 'nullable|exists:surahs,id',
             'memorization_to_verse' => 'nullable|integer|min:1',
             'memorization_parts' => 'nullable|numeric|min:0.25|max:30|required_without:revision_parts',
+            'revision_from_surah' => 'nullable|exists:surahs,id',
+            'revision_from_verse' => 'nullable|integer|min:1',
+            'revision_to_surah' => 'nullable|exists:surahs,id',
+            'revision_to_verse' => 'nullable|integer|min:1',
             'revision_parts' => 'nullable|numeric|min:0|max:30|required_without:memorization_parts',
             'grade' => 'nullable|integer|min:0|max:100',
             'notes' => 'nullable|string|max:1000',
@@ -119,6 +100,11 @@ class DailyReportController extends Controller
                 'memorization_to_surah' => $request->memorization_to_surah,
                 'memorization_to_verse' => $request->memorization_to_verse,
                 'memorization_parts' => $request->memorization_parts,
+                'revision_from_surah' => $request->revision_from_surah,
+                'revision_from_verse' => $request->revision_from_verse,
+                'revision_to_surah' => $request->revision_to_surah,
+                'revision_to_verse' => $request->revision_to_verse,
+                'revision_parts' => $request->revision_parts,
                 'grade' => $request->grade,
                 'notes' => $request->notes,
             ]);
@@ -136,6 +122,11 @@ class DailyReportController extends Controller
             'memorization_to_surah' => $request->memorization_to_surah,
             'memorization_to_verse' => $request->memorization_to_verse,
             'memorization_parts' => $request->memorization_parts,
+            'revision_from_surah' => $request->revision_from_surah,
+            'revision_from_verse' => $request->revision_from_verse,
+            'revision_to_surah' => $request->revision_to_surah,
+            'revision_to_verse' => $request->revision_to_verse,
+            'revision_parts' => $request->revision_parts,
             'grade' => $request->grade,
             'notes' => $request->notes,
         ]);
@@ -191,7 +182,7 @@ class DailyReportController extends Controller
             
         // Build query for reports
         $reportsQuery = DailyReport::whereIn('student_id', $studentsInCircles)
-            ->with(['student', 'fromSurah', 'toSurah']);
+            ->with(['student', 'fromSurah', 'toSurah', 'revision_from_surah', 'revision_to_surah']);
             
         // Apply filters if any
         if ($request->has('student_id') && $request->student_id) {
@@ -263,6 +254,10 @@ class DailyReportController extends Controller
             'reports.*.memorization_from_verse' => 'nullable|integer|min:1',
             'reports.*.memorization_to_surah' => 'nullable|exists:surahs,id',
             'reports.*.memorization_to_verse' => 'nullable|integer|min:1',
+            'reports.*.revision_from_surah' => 'nullable|exists:surahs,id',
+            'reports.*.revision_from_verse' => 'nullable|integer|min:1',
+            'reports.*.revision_to_surah' => 'nullable|exists:surahs,id',
+            'reports.*.revision_to_verse' => 'nullable|integer|min:1',
             'reports.*.notes' => 'nullable|string|max:1000',
         ]);
 
@@ -290,5 +285,210 @@ class DailyReportController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', t('error_creating_reports') . ': ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Display calendar-based daily reports dashboard.
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function calendar(Request $request)
+    {
+        $user = Auth::user();
+        $circles = StudyCircle::where('teacher_id', $user->id)->get();
+        $selectedCircle = null;
+        $students = collect();
+        $calendarData = [];
+        $stats = [];
+        
+        // Get current month/year from request or default to current
+        $currentMonth = $request->get('month', now()->month);
+        $currentYear = $request->get('year', now()->year);
+        
+        if ($request->has('circle_id')) {
+            $selectedCircle = $circles->firstWhere('id', $request->circle_id);
+            if ($selectedCircle) {
+                $students = $selectedCircle->students()->with(['dailyReports' => function($query) use ($currentMonth, $currentYear) {
+                    $query->whereMonth('report_date', $currentMonth)
+                          ->whereYear('report_date', $currentYear);
+                }])->get();
+                
+                // Prepare calendar data
+                $calendarData = $this->prepareCalendarData($students, $currentMonth, $currentYear);
+                
+                // Calculate statistics
+                $stats = $this->calculateCircleStats($selectedCircle, $currentMonth, $currentYear);
+            }
+        }
+        
+        // Get surahs for bulk form
+        $surahs = Surah::orderBy('id')->get();
+        
+        return view('teacher.daily-reports.calendar', compact(
+            'circles', 
+            'selectedCircle', 
+            'students', 
+            'calendarData', 
+            'stats', 
+            'currentMonth', 
+            'currentYear',
+            'surahs'
+        ));
+    }
+
+    /**
+     * Prepare calendar data for display.
+     *
+     * @param Collection $students
+     * @param int $month
+     * @param int $year
+     * @return array
+     */
+    private function prepareCalendarData($students, $month, $year)
+    {
+        $calendarData = [];
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        
+        foreach ($students as $student) {
+            $studentData = [
+                'id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'joining_date' => $student->created_at->format('Y-m-d'),
+                'profile_photo' => $student->profile_photo,
+                'days' => []
+            ];
+            
+            // Initialize all days for the month
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $date = sprintf('%04d-%02d-%02d', $year, $month, $day);
+                $studentData['days'][$day] = [
+                    'date' => $date,
+                    'has_memorization' => false,
+                    'has_revision' => false,
+                    'report' => null,
+                    'color_class' => 'red' // default: no report
+                ];
+            }
+            
+            // Fill in actual report data
+            foreach ($student->dailyReports as $report) {
+                $day = $report->report_date->day;
+                if (isset($studentData['days'][$day])) {
+                    $hasMemorization = $report->memorization_parts > 0;
+                    $hasRevision = $report->revision_parts > 0;
+                    
+                    $colorClass = 'red'; // default
+                    if ($hasMemorization && $hasRevision) {
+                        $colorClass = 'green';
+                    } elseif ($hasMemorization) {
+                        $colorClass = 'blue';
+                    } elseif ($hasRevision) {
+                        $colorClass = 'yellow';
+                    }
+                    
+                    $studentData['days'][$day] = [
+                        'date' => $report->report_date->format('Y-m-d'),
+                        'has_memorization' => $hasMemorization,
+                        'has_revision' => $hasRevision,
+                        'report' => $report,
+                        'color_class' => $colorClass
+                    ];
+                }
+            }
+            
+            $calendarData[] = $studentData;
+        }
+        
+        return $calendarData;
+    }
+
+    /**
+     * Calculate statistics for a circle.
+     *
+     * @param StudyCircle $circle
+     * @param int $month
+     * @param int $year
+     * @return array
+     */
+    private function calculateCircleStats($circle, $month, $year)
+    {
+        $studentsInCircle = DB::table('circle_students')
+            ->where('circle_id', $circle->id)
+            ->pluck('student_id');
+            
+        $reportsQuery = DailyReport::whereIn('student_id', $studentsInCircle)
+            ->whereMonth('report_date', $month)
+            ->whereYear('report_date', $year);
+            
+        $totalReports = $reportsQuery->count();
+        $totalStudents = $studentsInCircle->count();
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $possibleReports = $totalStudents * $daysInMonth;
+        
+        $attendancePercentage = $possibleReports > 0 ? ($totalReports / $possibleReports) * 100 : 0;
+        
+        $memorizationReports = $reportsQuery->where('memorization_parts', '>', 0)->count();
+        $revisionReports = $reportsQuery->where('revision_parts', '>', 0)->count();
+        $bothReports = $reportsQuery->where('memorization_parts', '>', 0)
+            ->where('revision_parts', '>', 0)->count();
+        
+        $averageGrade = $reportsQuery->avg('grade') ?? 0;
+        $totalMemorizationParts = $reportsQuery->sum('memorization_parts') ?? 0;
+        $totalRevisionParts = $reportsQuery->sum('revision_parts') ?? 0;
+        
+        return [
+            'total_students' => $totalStudents,
+            'total_reports' => $totalReports,
+            'attendance_percentage' => round($attendancePercentage, 1),
+            'memorization_reports' => $memorizationReports,
+            'revision_reports' => $revisionReports,
+            'both_reports' => $bothReports,
+            'average_grade' => round($averageGrade, 1),
+            'total_memorization_parts' => $totalMemorizationParts,
+            'total_revision_parts' => $totalRevisionParts,
+        ];
+    }
+
+    /**
+     * Get report details for a specific date and student (AJAX endpoint).
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getReportDetails(Request $request)
+    {
+        $studentId = $request->get('student_id');
+        $date = $request->get('date');
+        
+                $report = DailyReport::where('student_id', $studentId)
+             ->where('report_date', $date)
+             ->with(['fromSurah', 'toSurah', 'revision_from_surah', 'revision_to_surah'])
+             ->first();
+            
+        if (!$report) {
+            return response()->json(['success' => false, 'message' => 'No report found']);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'report' => [
+                'id' => $report->id,
+                'memorization_parts' => $report->memorization_parts,
+                'revision_parts' => $report->revision_parts,
+                'grade' => $report->grade,
+                'memorization_from_surah' => $report->fromSurah ? $report->fromSurah->name : null,
+                'memorization_to_surah' => $report->toSurah ? $report->toSurah->name : null,
+                'memorization_from_verse' => $report->memorization_from_verse,
+                'memorization_to_verse' => $report->memorization_to_verse,
+                'revision_from_surah' => $report->revision_from_surah ? $report->revision_from_surah->name : null,
+                'revision_to_surah' => $report->revision_to_surah ? $report->revision_to_surah->name : null,
+                'revision_from_verse' => $report->revision_from_verse,
+                'revision_to_verse' => $report->revision_to_verse,
+                'notes' => $report->notes,
+                'report_date' => $report->report_date->format('Y-m-d'),
+            ]
+        ]);
     }
 } 
