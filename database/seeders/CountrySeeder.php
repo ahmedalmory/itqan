@@ -167,6 +167,13 @@ class countryseeder extends seeder
                 'order' => 22,
                 'country_code' => 269,
             ],
+            [
+                'id' => '23',
+                'name' => 'Estonia',
+                'alt_name' => 'إستونيا',
+                'order' => 23,
+                'country_code' => 372,
+            ],
         ];
 
         DB::table('countries')->insert($countries);

@@ -25,6 +25,9 @@ class DatabaseSeeder extends Seeder
             RewardRedemptionSeeder::class,
             SubscriptionPlanSeeder::class,
             PaymentSettingsSeeder::class,
+            NasserAlKhameesAcademySeeder::class,
+            // Add academy-specific translations
+            Translations\NasserAcademyTranslationSeeder::class,
         ]);
     }
 }
