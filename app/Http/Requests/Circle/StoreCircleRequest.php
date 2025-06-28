@@ -35,6 +35,9 @@ class StoreCircleRequest extends FormRequest
             'age_from' => ['required', 'integer', 'min:5'],
             'age_to' => ['required', 'integer', 'max:100', 'gte:age_from'],
             'circle_time' => ['nullable', 'string', 'in:after_fajr,after_dhuhr,after_asr,after_maghrib,after_isha'],
+            'is_active' => ['sometimes', 'boolean'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'meeting_time' => ['nullable', 'string', 'max:255'],
         ];
     }
 
