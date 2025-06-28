@@ -26,6 +26,9 @@ return new class extends Migration
             $table->enum('circle_time', [
                 'after_fajr', 'after_dhuhr', 'after_asr', 'after_maghrib', 'after_isha'
             ])->nullable();
+            $table->string('location')->nullable();
+            $table->time('meeting_time')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
@@ -37,4 +40,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('study_circles');
     }
-}; 
+};

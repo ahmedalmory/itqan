@@ -33,6 +33,18 @@ class StudyCircle extends Model
         'age_from',
         'age_to',
         'circle_time',
+        'is_active',
+        'location',
+        'meeting_time',
+    ];
+    
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
     
     /**
