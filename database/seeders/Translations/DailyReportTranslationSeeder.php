@@ -303,13 +303,17 @@ class DailyReportTranslationSeeder extends AbstractTranslationSeeder
                 'ar' => 'تفاصيل الحفظ',
                 'en' => 'Memorization Details'
             ],
+            'memorization' => [
+                'ar' => 'الحفظ',
+                'en' => 'Memorization'
+            ],
             'revision_details' => [
                 'ar' => 'تفاصيل المراجعة',
                 'en' => 'Revision Details'
             ],
             'parts' => [
-                'ar' => 'الأوجه',
-                'en' => 'Parts'
+                'ar' => 'أجزاء',
+                'en' => 'parts'
             ],
             'verses' => [
                 'ar' => 'الآيات',
@@ -394,6 +398,24 @@ class DailyReportTranslationSeeder extends AbstractTranslationSeeder
             'no_report_tooltip' => [
                 'ar' => 'لا يوجد تقرير',
                 'en' => 'No report'
+            ],
+            
+            // New translations for enhanced calendar views
+            'report_found' => [
+                'ar' => 'تم العثور على التقرير',
+                'en' => 'Report Found'
+            ],
+            'date' => [
+                'ar' => 'التاريخ',
+                'en' => 'Date'
+            ],
+            'no_report_found_for_date' => [
+                'ar' => 'لم يتم العثور على تقرير لهذا التاريخ',
+                'en' => 'No report found for this date'
+            ],
+            'current_week' => [
+                'ar' => 'الأسبوع الحالي',
+                'en' => 'Current Week'
             ],
         ];
     }

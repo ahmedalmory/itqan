@@ -65,7 +65,8 @@
                 
                 @if($selectedCircle)
                 <div class="col-md-8">
-                    <div class="d-flex justify-content-center align-items-center">
+                    <!-- Monthly Navigation -->
+                    <div class="d-flex justify-content-center align-items-center" id="monthlyNavigation">
                         <form method="GET" class="d-flex align-items-center">
                             <input type="hidden" name="circle_id" value="{{ $selectedCircle->id }}">
                             
@@ -80,6 +81,43 @@
                             
                             <button type="submit" name="month" value="{{ $currentMonth == 12 ? 1 : $currentMonth + 1 }}" 
                                     class="btn btn-outline-secondary btn-sm ms-2">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Daily Navigation -->
+                    <div class="d-flex justify-content-center align-items-center d-none" id="dailyNavigation">
+                        <form method="GET" class="d-flex align-items-center">
+                            <input type="hidden" name="circle_id" value="{{ $selectedCircle->id }}">
+                            
+                            <button type="button" id="prevDay" class="btn btn-outline-secondary btn-sm me-2">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            
+                            <input type="date" id="selectedDate" name="date" class="form-control mx-3" 
+                                   value="{{ now()->format('Y-m-d') }}" style="width: 150px;">
+                            
+                            <button type="button" id="nextDay" class="btn btn-outline-secondary btn-sm ms-2">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Weekly Navigation -->
+                    <div class="d-flex justify-content-center align-items-center d-none" id="weeklyNavigation">
+                        <form method="GET" class="d-flex align-items-center">
+                            <input type="hidden" name="circle_id" value="{{ $selectedCircle->id }}">
+                            
+                            <button type="button" id="prevWeek" class="btn btn-outline-secondary btn-sm me-2">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            
+                            <h4 class="mb-0 mx-3" id="weekRange">
+                                {{ t('current_week') }}
+                            </h4>
+                            
+                            <button type="button" id="nextWeek" class="btn btn-outline-secondary btn-sm ms-2">
                                 <i class="bi bi-chevron-right"></i>
                             </button>
                         </form>
@@ -198,107 +236,63 @@
             <div class="card-body">
                 <!-- Daily View -->
                 <div id="dailyCalendar" class="calendar-view d-none">
-                    <div class="table-responsive">
-                        <table class="table table-bordered calendar-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 200px;">{{ t('student') }}</th>
-                                @php
-                                    $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $currentMonth, $currentYear);
-                                @endphp
-                                @for($day = 1; $day <= $daysInMonth; $day++)
-                                    @php
-                                        $date = \Carbon\Carbon::createFromDate($currentYear, $currentMonth, $day);
-                                        $isWeekend = $date->isWeekend();
-                                        $dayName = $date->format('D');
-                                    @endphp
-                                    <th class="text-center {{ $isWeekend ? 'weekend-header' : '' }}" style="min-width: 35px;">
-                                        <div>{{ $day }}</div>
-                                        <small class="text-muted">{{ $dayName }}</small>
-                                    </th>
-                                @endfor
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($calendarData as $studentData)
-                                <tr>
-                                    <td class="student-info">
-                                        <div class="d-flex align-items-center">
-                                            @if($studentData['profile_photo'])
-                                                <img src="{{ asset('storage/' . $studentData['profile_photo']) }}" 
-                                                     class="rounded-circle me-2" style="width: 35px; height: 35px;" 
-                                                     alt="{{ $studentData['name'] }}">
-                                            @else
-                                                <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center" 
-                                                     style="width: 35px; height: 35px; color: white; font-size: 14px;">
-                                                    {{ substr($studentData['name'], 0, 1) }}
-                                                </div>
-                                            @endif
-                                            <div>
-                                                <div class="fw-bold">{{ $studentData['name'] }}</div>
-                                                <small class="text-muted">
-                                                    {{ t('joined') }}: {{ \Carbon\Carbon::parse($studentData['joining_date'])->format('M d, Y') }}
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    @for($day = 1; $day <= $daysInMonth; $day++)
-                                        @php
-                                            $dayData = $studentData['days'][$day];
-                                            $date = \Carbon\Carbon::createFromDate($currentYear, $currentMonth, $day);
-                                            $isFuture = $date->isFuture();
-                                            $isToday = $date->isToday();
-                                            $colorClass = $isFuture ? 'secondary' : $dayData['color_class'];
-                                        @endphp
-                                        <td class="calendar-day text-center position-relative" 
-                                            data-student-id="{{ $studentData['id'] }}" 
-                                            data-date="{{ $dayData['date'] }}"
-                                            data-bs-toggle="tooltip" 
-                                            title="{{ $studentData['name'] }} - {{ $dayData['date'] }}{{ $dayData['report'] ? ': ' . t('mem') . ': ' . $dayData['report']->memorization_parts . 'p, ' . t('rev') . ': ' . $dayData['report']->revision_parts . 'p, ' . t('grade') . ': ' . $dayData['report']->grade . '%' : ': ' . t('no_report_tooltip') }}">
-                                            
-                                            @if(!$isFuture)
-                                                <div class="calendar-day-content bg-{{ $colorClass === 'green' ? 'success' : ($colorClass === 'blue' ? 'primary' : ($colorClass === 'yellow' ? 'warning' : 'danger')) }} {{ $dayData['report'] ? 'clickable' : '' }}"
-                                                     style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto; cursor: {{ $dayData['report'] ? 'pointer' : 'default' }};">
-                                                    {{ $day }}
-                                                </div>
-                                                @if($isToday)
-                                                    <div class="today-indicator"></div>
-                                                @endif
-                                            @else
-                                                <div class="calendar-day-content bg-secondary" 
-                                                     style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto; opacity: 0.5;">
-                                                    {{ $day }}
-                                                </div>
-                                            @endif
-                                        </td>
-                                    @endfor
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <div class="row" id="dailyReportsContainer">
+                        <!-- Daily reports will be populated by JavaScript -->
                     </div>
                 </div>
                 
                 <!-- Weekly View -->
                 <div id="weeklyCalendar" class="calendar-view d-none">
-                    <div class="table-responsive">
-                        <table class="table table-bordered calendar-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 200px;">{{ t('student') }}</th>
-                                    <th class="text-center">{{ t('monday') }}</th>
-                                    <th class="text-center">{{ t('tuesday') }}</th>
-                                    <th class="text-center">{{ t('wednesday') }}</th>
-                                    <th class="text-center">{{ t('thursday') }}</th>
-                                    <th class="text-center">{{ t('friday') }}</th>
-                                    <th class="text-center weekend-header">{{ t('saturday') }}</th>
-                                    <th class="text-center weekend-header">{{ t('sunday') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody id="weeklyTableBody">
-                                <!-- Weekly data will be populated by JavaScript -->
-                            </tbody>
-                        </table>
+                    <div class="row">
+                        @foreach($calendarData as $studentData)
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <div class="d-flex align-items-center">
+                                        @if($studentData['profile_photo'])
+                                            <img src="{{ asset('storage/' . $studentData['profile_photo']) }}" 
+                                                 class="rounded-circle me-2" style="width: 40px; height: 40px;" 
+                                                 alt="{{ $studentData['name'] }}">
+                                        @else
+                                            <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center" 
+                                                 style="width: 40px; height: 40px; color: white; font-size: 16px;">
+                                                {{ substr($studentData['name'], 0, 1) }}
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <h6 class="mb-0">{{ $studentData['name'] }}</h6>
+                                            <small class="text-muted">{{ t('student_id') }}: {{ $studentData['id'] }}</small>
+                                            <br>
+                                            <small class="text-muted">{{ t('joined') }}: {{ \Carbon\Carbon::parse($studentData['joining_date'])->format('M d, Y') }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-1" id="weeklyDaysContainer_{{ $studentData['id'] }}">
+                                        <!-- Weekly days will be populated by JavaScript -->
+                                    </div>
+                                    
+                                    <!-- Student Stats for current week -->
+                                    <div class="mt-3 pt-3 border-top">
+                                        <div class="row text-center">
+                                            <div class="col-4">
+                                                <div class="text-primary fw-bold weekly-memorization">0</div>
+                                                <small class="text-muted">{{ t('memorization') }}</small>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="text-warning fw-bold weekly-revision">0</div>
+                                                <small class="text-muted">{{ t('revision') }}</small>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="text-success fw-bold weekly-grade">0%</div>
+                                                <small class="text-muted">{{ t('avg_grade') }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
                 
@@ -866,6 +860,67 @@
         width: 100px;
     }
 }
+
+/* Daily View Styles */
+#dailyCalendar .card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+#dailyCalendar .card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#dailyCalendar .alert {
+    border-radius: 8px;
+}
+
+#dailyCalendar .alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+#dailyCalendar .alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+}
+
+#dailyCalendar .row {
+    margin-bottom: 8px;
+}
+
+#dailyCalendar .row:last-child {
+    margin-bottom: 0;
+}
+
+/* Navigation Styles */
+#dailyNavigation .form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+}
+
+#weeklyNavigation h4 {
+    min-width: 300px;
+    text-align: center;
+}
+
+/* Weekly View Styles */
+.weekly-memorization,
+.weekly-revision,
+.weekly-grade {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+#weeklyCalendar .card-body {
+    min-height: 200px;
+}
+
+#weeklyCalendar .card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+}
 </style>
 @endpush
 
@@ -876,8 +931,34 @@ const translations = {
     mem: '{{ t("mem") }}',
     rev: '{{ t("rev") }}',
     grade: '{{ t("grade") }}',
-    no_report_tooltip: '{{ t("no_report_tooltip") }}'
+    no_report_tooltip: '{{ t("no_report_tooltip") }}',
+    memorization: '{{ t("memorization") }}',
+    revision: '{{ t("revision") }}',
+    notes: '{{ t("notes") }}',
+    no_report: '{{ t("no_report") }}',
+    from_surah: '{{ t("from_surah") }}',
+    to_surah: '{{ t("to_surah") }}',
+    from_verse: '{{ t("from_verse") }}',
+    to_verse: '{{ t("to_verse") }}',
+    student_id: '{{ t("student_id") }}',
+    joined: '{{ t("joined") }}',
+    report_found: '{{ t("report_found") }}',
+    memorization_details: '{{ t("memorization_details") }}',
+    revision_details: '{{ t("revision_details") }}',
+    date: '{{ t("date") }}',
+    no_report_found_for_date: '{{ t("no_report_found_for_date") }}',
+    parts: '{{ t("parts") }}',
+    current_week: '{{ t("current_week") }}'
 };
+
+// Calendar data for JavaScript
+const calendarData = @json($calendarData ?? []);
+const surahs = @json($surahs ?? []);
+const selectedCircleId = '{{ $selectedCircle->id ?? '' }}';
+
+// Current date for navigation
+let currentSelectedDate = '{{ now()->format("Y-m-d") }}';
+let currentWeekStart = new Date();
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
@@ -956,8 +1037,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Initialize click handlers for daily view on page load
+    // Initialize click handlers and tooltips for all views on page load
+    initializeTooltips();
     initializeClickHandlers();
+    
+    // Check if daily view is already selected and populate it
+    const selectedViewButton = document.querySelector('input[name="viewType"]:checked');
+    if (selectedViewButton && selectedViewButton.value === 'day') {
+        // Show daily navigation and populate daily view
+        document.getElementById('monthlyNavigation').classList.add('d-none');
+        document.getElementById('dailyNavigation').classList.remove('d-none');
+        populateDailyView();
+    }
     
     // Bulk Report Modal JavaScript
     @if($selectedCircle)
@@ -1215,69 +1306,251 @@ document.addEventListener('DOMContentLoaded', function() {
             // Hide all views
             calendarViews.forEach(view => view.classList.add('d-none'));
             
-            // Show selected view
+            // Hide all navigation controls
+            document.getElementById('monthlyNavigation').classList.add('d-none');
+            document.getElementById('dailyNavigation').classList.add('d-none');
+            document.getElementById('weeklyNavigation').classList.add('d-none');
+            
+            // Show selected view and navigation
             const selectedView = this.value;
             if (selectedView === 'day') {
                 document.getElementById('dailyCalendar').classList.remove('d-none');
-                // Reinitialize click handlers for daily view
-                initializeClickHandlers();
+                document.getElementById('dailyNavigation').classList.remove('d-none');
+                populateDailyView();
             } else if (selectedView === 'week') {
                 document.getElementById('weeklyCalendar').classList.remove('d-none');
+                document.getElementById('weeklyNavigation').classList.remove('d-none');
                 populateWeeklyView();
             } else if (selectedView === 'month') {
                 document.getElementById('monthlyCalendar').classList.remove('d-none');
-                // Reinitialize click handlers for monthly view
+                document.getElementById('monthlyNavigation').classList.remove('d-none');
+                // Reinitialize click handlers and tooltips for monthly view
+                initializeTooltips();
                 initializeClickHandlers();
             }
         });
     });
     
+    // Daily navigation controls
+    document.getElementById('prevDay').addEventListener('click', function() {
+        const currentDate = new Date(currentSelectedDate);
+        currentDate.setDate(currentDate.getDate() - 1);
+        currentSelectedDate = currentDate.toISOString().split('T')[0];
+        document.getElementById('selectedDate').value = currentSelectedDate;
+        populateDailyView();
+    });
+    
+    document.getElementById('nextDay').addEventListener('click', function() {
+        const currentDate = new Date(currentSelectedDate);
+        currentDate.setDate(currentDate.getDate() + 1);
+        currentSelectedDate = currentDate.toISOString().split('T')[0];
+        document.getElementById('selectedDate').value = currentSelectedDate;
+        populateDailyView();
+    });
+    
+    document.getElementById('selectedDate').addEventListener('change', function() {
+        currentSelectedDate = this.value;
+        populateDailyView();
+    });
+    
+    // Weekly navigation controls
+    document.getElementById('prevWeek').addEventListener('click', function() {
+        currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+        updateWeekRange();
+        populateWeeklyView();
+    });
+    
+    document.getElementById('nextWeek').addEventListener('click', function() {
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+        updateWeekRange();
+        populateWeeklyView();
+    });
+    
+    // Initialize week range
+    function updateWeekRange() {
+        const startOfWeek = new Date(currentWeekStart);
+        startOfWeek.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Monday
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+        
+        const weekRangeText = `${startOfWeek.toLocaleDateString()} - ${endOfWeek.toLocaleDateString()}`;
+        document.getElementById('weekRange').textContent = weekRangeText;
+    }
+    
+    // Initialize week range on page load
+    updateWeekRange();
+    
+    // Set current week start to today
+    currentWeekStart = new Date();
+    currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Monday
+    
+    // Function to populate daily view
+    function populateDailyView() {
+        if (!selectedCircleId || !calendarData) return;
+        
+        const dailyContainer = document.getElementById('dailyReportsContainer');
+        if (!dailyContainer) return;
+        
+        dailyContainer.innerHTML = '';
+        
+                 calendarData.forEach(studentData => {
+             // Find the report for the selected date
+             const dayData = Object.values(studentData.days).find(day => day.date === currentSelectedDate);
+             
+             const studentCard = document.createElement('div');
+             studentCard.className = 'col-md-6 col-lg-4 mb-4';
+             
+             let reportContent = '';
+             if (dayData && dayData.report) {
+                 const report = dayData.report;
+                                  reportContent = `
+                     <div class="alert alert-success">
+                          <h6 class="mb-3"><i class="bi bi-journal-check"></i> ${translations.report_found}</h6>
+                         <div class="row">
+                             <div class="col-6">
+                                 <strong>${translations.memorization}:</strong><br>
+                                 <span class="text-primary">${report.memorization_parts || 0} ${translations.parts}</span>
+                             </div>
+                             <div class="col-6">
+                                 <strong>${translations.revision}:</strong><br>
+                                 <span class="text-warning">${report.revision_parts || 0} ${translations.parts}</span>
+                             </div>
+                         </div>
+                         <div class="row mt-2">
+                             <div class="col-6">
+                                 <strong>${translations.grade}:</strong><br>
+                                 <span class="text-success">${report.grade || 0}%</span>
+                             </div>
+                             <div class="col-6">
+                                 <strong>${translations.date}:</strong><br>
+                                 <span class="text-muted">${currentSelectedDate}</span>
+                             </div>
+                         </div>
+                         ${report.memorization_from_surah ? `
+                             <div class="mt-3">
+                                 <h6>${translations.memorization_details}:</h6>
+                                 <div class="row">
+                                     <div class="col-6">
+                                          <strong>${translations.from_surah}:</strong><br>
+                                         <span>${report.memorization_from_surah}</span>
+                                     </div>
+                                     <div class="col-6">
+                                          <strong>${translations.to_surah}:</strong><br>
+                                         <span>${report.memorization_to_surah || report.memorization_from_surah}</span>
+                                     </div>
+                                 </div>
+                                 <div class="row mt-1">
+                                     <div class="col-6">
+                                          <strong>${translations.from_verse}:</strong><br>
+                                         <span>${report.memorization_from_verse || 1}</span>
+                                     </div>
+                                     <div class="col-6">
+                                          <strong>${translations.to_verse}:</strong><br>
+                                         <span>${report.memorization_to_verse || 1}</span>
+                                     </div>
+                                 </div>
+                             </div>
+                         ` : ''}
+                         ${report.revision_from_surah ? `
+                             <div class="mt-3">
+                                 <h6>${translations.revision_details}:</h6>
+                                 <div class="row">
+                                     <div class="col-6">
+                                          <strong>${translations.from_surah}:</strong><br>
+                                         <span>${report.revision_from_surah}</span>
+                                     </div>
+                                     <div class="col-6">
+                                          <strong>${translations.to_surah}:</strong><br>
+                                         <span>${report.revision_to_surah || report.revision_from_surah}</span>
+                                     </div>
+                                 </div>
+                                 <div class="row mt-1">
+                                     <div class="col-6">
+                                          <strong>${translations.from_verse}:</strong><br>
+                                         <span>${report.revision_from_verse || 1}</span>
+                                     </div>
+                                     <div class="col-6">
+                                          <strong>${translations.to_verse}:</strong><br>
+                                         <span>${report.revision_to_verse || 1}</span>
+                                     </div>
+                                 </div>
+                             </div>
+                         ` : ''}
+                         ${report.notes ? `
+                             <div class="mt-3">
+                                 <strong>${translations.notes}:</strong><br>
+                                 <span class="text-muted">${report.notes}</span>
+                             </div>
+                         ` : ''}
+                     </div>
+                 `;
+             } else {
+                 reportContent = `
+                     <div class="alert alert-warning">
+                          <h6 class="mb-2"><i class="bi bi-exclamation-triangle"></i> ${translations.no_report}</h6>
+                         <p class="mb-0">${translations.no_report_found_for_date}</p>
+                     </div>
+                 `;
+             }
+            
+                         studentCard.innerHTML = `
+                 <div class="card h-100">
+                     <div class="card-header">
+                         <div class="d-flex align-items-center">
+                             ${studentData.profile_photo ? 
+                                 `<img src="{{ asset('storage/') }}/${studentData.profile_photo}" class="rounded-circle me-2" style="width: 40px; height: 40px;" alt="${studentData.name}">` :
+                                 `<div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; color: white; font-size: 16px;">${studentData.name.charAt(0)}</div>`
+                             }
+                             <div>
+                                 <h6 class="mb-0">${studentData.name}</h6>
+                                 <small class="text-muted">${translations.student_id}: ${studentData.id}</small>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="card-body">
+                         ${reportContent}
+                     </div>
+                 </div>
+             `;
+            
+            dailyContainer.appendChild(studentCard);
+        });
+        
+        // Re-initialize tooltips and click handlers
+        initializeTooltips();
+        initializeClickHandlers();
+    }
+    
     // Function to populate weekly view
     function populateWeeklyView() {
-        const weeklyTableBody = document.getElementById('weeklyTableBody');
-        if (!weeklyTableBody) return;
+        if (!selectedCircleId || !calendarData) return;
         
-        // Get current week (assuming we want to show current week)
-        const today = new Date();
-        const currentWeekStart = new Date(today);
-        currentWeekStart.setDate(today.getDate() - today.getDay() + 1); // Monday
-        
-        // Clear existing content
-        weeklyTableBody.innerHTML = '';
-        
-        @if($selectedCircle && isset($calendarData))
-        const calendarData = @json($calendarData);
+        // Get current week
+        const startOfWeek = new Date(currentWeekStart);
+        startOfWeek.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Monday
         
         calendarData.forEach(studentData => {
-            const row = document.createElement('tr');
+            const weeklyContainer = document.getElementById(`weeklyDaysContainer_${studentData.id}`);
+            if (!weeklyContainer) return;
             
-            // Student info cell
-            const studentCell = document.createElement('td');
-            studentCell.className = 'student-info';
-            studentCell.innerHTML = `
-                <div class="d-flex align-items-center">
-                    ${studentData.profile_photo ? 
-                        `<img src="{{ asset('storage/') }}/${studentData.profile_photo}" class="rounded-circle me-2" style="width: 35px; height: 35px;" alt="${studentData.name}">` :
-                        `<div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; color: white; font-size: 14px;">${studentData.name.charAt(0)}</div>`
-                    }
-                    <div>
-                        <div class="fw-bold">${studentData.name}</div>
-                        <small class="text-muted">{{ t('joined') }}: ${new Date(studentData.joining_date).toLocaleDateString()}</small>
-                    </div>
-                </div>
-            `;
-            row.appendChild(studentCell);
+            // Clear existing content
+            weeklyContainer.innerHTML = '';
+            
+            let totalMemorization = 0;
+            let totalRevision = 0;
+            let totalGrade = 0;
+            let reportCount = 0;
             
             // Add cells for each day of the week
             for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-                const currentDate = new Date(currentWeekStart);
-                currentDate.setDate(currentWeekStart.getDate() + dayOffset);
-                
-                const dayCell = document.createElement('td');
-                dayCell.className = 'calendar-day text-center position-relative';
+                const currentDate = new Date(startOfWeek);
+                currentDate.setDate(startOfWeek.getDate() + dayOffset);
                 
                 const dateStr = currentDate.toISOString().split('T')[0];
                 const dayData = Object.values(studentData.days).find(day => day.date === dateStr);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'col';
                 
                 if (dayData) {
                     const isFuture = currentDate > new Date();
@@ -1294,39 +1567,66 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                     
-                    dayCell.innerHTML = `
-                        <div class="calendar-day-content bg-${bgColorClass} ${dayData.report ? 'clickable' : ''}"
-                             style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto; cursor: ${dayData.report ? 'pointer' : 'default'};"
+                    dayElement.innerHTML = `
+                        <div class="calendar-day-mini text-center position-relative" 
                              data-student-id="${studentData.id}" 
-                             data-date="${dateStr}">
-                            ${currentDate.getDate()}
+                             data-date="${dateStr}"
+                             data-bs-toggle="tooltip" 
+                             title="${dateStr}${dayData.report ? ': ' + translations.mem + ': ' + dayData.report.memorization_parts + 'p, ' + translations.rev + ': ' + dayData.report.revision_parts + 'p, ' + translations.grade + ': ' + dayData.report.grade + '%' : ': ' + translations.no_report_tooltip}">
+                            
+                            ${!isFuture ? `
+                                <div class="calendar-day-content bg-${bgColorClass} ${dayData.report ? 'clickable' : ''}"
+                                     style="width: 25px; height: 25px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto; cursor: ${dayData.report ? 'pointer' : 'default'}; font-size: 0.75rem;">
+                                    ${currentDate.getDate()}
+                                </div>
+                                ${isToday ? '<div class="today-indicator" style="bottom: 0px;"></div>' : ''}
+                            ` : `
+                                <div class="calendar-day-content bg-secondary" 
+                                     style="width: 25px; height: 25px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto; opacity: 0.5; font-size: 0.75rem;">
+                                    ${currentDate.getDate()}
+                                </div>
+                            `}
                         </div>
-                        ${isToday ? '<div class="today-indicator"></div>' : ''}
                     `;
                     
+                    // Calculate weekly stats
                     if (dayData.report) {
-                        dayCell.setAttribute('data-bs-toggle', 'tooltip');
-                        dayCell.setAttribute('title', `${studentData.name} - ${dateStr}: ${translations.mem}: ${dayData.report.memorization_parts}p, ${translations.rev}: ${dayData.report.revision_parts}p, ${translations.grade}: ${dayData.report.grade}%`);
+                        totalMemorization += dayData.report.memorization_parts;
+                        totalRevision += dayData.report.revision_parts;
+                        totalGrade += dayData.report.grade;
+                        reportCount++;
                     }
                 } else {
-                    dayCell.innerHTML = `
-                        <div class="calendar-day-content bg-light text-dark"
-                             style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; opacity: 0.5;">
-                            ${currentDate.getDate()}
+                    dayElement.innerHTML = `
+                        <div class="calendar-day-mini text-center position-relative">
+                            <div class="calendar-day-content bg-light text-dark"
+                                 style="width: 25px; height: 25px; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin: 0 auto; opacity: 0.5; font-size: 0.75rem;">
+                                ${currentDate.getDate()}
+                            </div>
                         </div>
                     `;
                 }
                 
-                row.appendChild(dayCell);
+                weeklyContainer.appendChild(dayElement);
             }
             
-            weeklyTableBody.appendChild(row);
+            // Update weekly stats
+            const avgGrade = reportCount > 0 ? Math.round(totalGrade / reportCount * 10) / 10 : 0;
+            const studentCard = weeklyContainer.closest('.card');
+            if (studentCard) {
+                const memorizationElement = studentCard.querySelector('.weekly-memorization');
+                const revisionElement = studentCard.querySelector('.weekly-revision');
+                const gradeElement = studentCard.querySelector('.weekly-grade');
+                
+                if (memorizationElement) memorizationElement.textContent = totalMemorization;
+                if (revisionElement) revisionElement.textContent = totalRevision;
+                if (gradeElement) gradeElement.textContent = `${avgGrade}%`;
+            }
         });
         
         // Re-initialize tooltips and click handlers for weekly view
         initializeTooltips();
         initializeClickHandlers();
-        @endif
     }
     
     // Function to initialize tooltips
