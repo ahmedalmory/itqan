@@ -168,7 +168,7 @@ class DailyReportController extends Controller
      * View reports history.
      *
      * @param Request $request
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Contracts\Support\Renderable|\Illuminate\Http\JsonResponse
      */
     public function history(Request $request)
     {
@@ -205,6 +205,11 @@ class DailyReportController extends Controller
             $reportsQuery->whereIn('student_id', $studentsInSelectedCircle);
         }
         
+        // Check if this is a request for students summary
+        if ($request->has('export') && $request->export === 'summary') {
+            return $this->generateStudentsSummary($reportsQuery, $request);
+        }
+        
         // Order by date
         $reportsQuery->orderBy('report_date', 'desc');
         
@@ -221,6 +226,84 @@ class DailyReportController extends Controller
             'students' => $students,
             'filters' => $request->only(['student_id', 'circle_id', 'from_date', 'to_date']),
         ]);
+    }
+
+    /**
+     * Generate students summary for export.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $reportsQuery
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function generateStudentsSummary($reportsQuery, Request $request)
+    {
+        try {
+            // Get all reports without pagination
+            $allReports = $reportsQuery->get();
+            
+            // Calculate statistics
+            $totalReports = $allReports->count();
+            $totalStudents = $allReports->pluck('student_id')->unique()->count();
+            $averageGrade = $allReports->avg('grade') ?? 0;
+            
+            // Get top students with their statistics
+            $studentStats = $allReports->groupBy('student_id')->map(function ($studentReports) {
+                $student = $studentReports->first()->student;
+                return [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'reports_count' => $studentReports->count(),
+                    'average_grade' => round($studentReports->avg('grade') ?? 0, 1),
+                    'total_memorization' => round($studentReports->sum('memorization_parts'), 2),
+                    'total_revision' => round($studentReports->sum('revision_parts'), 2),
+                    'latest_report_date' => $studentReports->max('report_date'),
+                ];
+            })->sortByDesc('average_grade')->take(10)->values();
+            
+            // Get circle statistics if circle filter is applied
+            $circleStats = null;
+            if ($request->has('circle_id') && $request->circle_id) {
+                $circle = StudyCircle::find($request->circle_id);
+                if ($circle) {
+                    $circleStats = [
+                        'circle_name' => $circle->name,
+                        'circle_id' => $circle->id,
+                        'department' => $circle->department->name ?? null,
+                        'teacher' => $circle->teacher->name ?? null,
+                    ];
+                }
+            }
+            
+            // Get date range info
+            $dateRange = [
+                'from' => $request->from_date,
+                'to' => $request->to_date,
+                'generated_at' => now()->toDateTimeString(),
+            ];
+            
+            // Prepare response data
+            $summaryData = [
+                'success' => true,
+                'stats' => [
+                    'total_students' => $totalStudents,
+                    'total_reports' => $totalReports,
+                    'average_grade' => round($averageGrade, 1),
+                ],
+                'top_students' => $studentStats,
+                'circle_stats' => $circleStats,
+                'date_range' => $dateRange,
+                'filters' => $request->only(['student_id', 'circle_id', 'from_date', 'to_date']),
+            ];
+            
+            return response()->json($summaryData);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating students summary: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

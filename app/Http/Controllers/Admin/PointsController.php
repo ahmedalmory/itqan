@@ -203,6 +203,11 @@ class PointsController extends BasePointsController
             $historyQuery->whereDate('created_at', '<=', $request->to_date);
         }
         
+        // Check if this is a request for points summary
+        if ($request->has('export') && $request->export === 'summary') {
+            return $this->generatePointsSummary($historyQuery, $student, $circles, $request);
+        }
+        
         $history = $historyQuery->orderBy('created_at', 'desc')->paginate(20);
         
         $studentPoints = StudentPoint::where('student_id', $studentId);
@@ -224,6 +229,75 @@ class PointsController extends BasePointsController
             'studentPoints' => $studentPoints,
             'filters' => $request->only(['circle_id', 'from_date', 'to_date']),
         ]);
+    }
+
+    /**
+     * Generate points summary for export.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $historyQuery
+     * @param \App\Models\User $student
+     * @param \Illuminate\Database\Eloquent\Collection $circles
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function generatePointsSummary($historyQuery, $student, $circles, Request $request)
+    {
+        try {
+            // Get all history records without pagination
+            $allHistory = $historyQuery->get();
+            
+            // Calculate statistics
+            $totalPoints = $allHistory->sum('points');
+            $totalHistoryRecords = $allHistory->count();
+            
+            // Get circles breakdown
+            $circlesBreakdown = $allHistory->groupBy('circle_id')->map(function ($circleHistory) {
+                $circle = $circleHistory->first()->circle;
+                return [
+                    'circle_id' => $circle->id,
+                    'circle_name' => $circle->name,
+                    'total_points' => $circleHistory->sum('points'),
+                    'records_count' => $circleHistory->count(),
+                    'last_activity' => $circleHistory->max('created_at'),
+                ];
+            })->values()->sortByDesc('total_points');
+            
+            // Get student info
+            $studentInfo = [
+                'id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'total_points' => $totalPoints,
+            ];
+            
+            // Get date range info
+            $dateRange = [
+                'from' => $request->from_date,
+                'to' => $request->to_date,
+                'generated_at' => now()->toDateTimeString(),
+            ];
+            
+            // Prepare response data
+            $summaryData = [
+                'success' => true,
+                'stats' => [
+                    'total_points' => $totalPoints,
+                    'total_history_records' => $totalHistoryRecords,
+                ],
+                'circles_breakdown' => $circlesBreakdown,
+                'student_info' => $studentInfo,
+                'date_range' => $dateRange,
+                'filters' => $request->only(['circle_id', 'from_date', 'to_date']),
+            ];
+            
+            return response()->json($summaryData);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating points summary: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function leaderboard(Request $request)

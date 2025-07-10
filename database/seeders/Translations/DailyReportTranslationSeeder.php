@@ -417,6 +417,118 @@ class DailyReportTranslationSeeder extends AbstractTranslationSeeder
                 'ar' => 'الأسبوع الحالي',
                 'en' => 'Current Week'
             ],
+            'reports_history' => [
+                'ar' => 'تاريخ التقارير',
+                'en' => 'Reports History'
+            ],
+            'daily_reports_history' => [
+                'ar' => 'تاريخ التقارير اليومية',
+                'en' => 'Daily Reports History'
+            ],
+            'back_to_calendar' => [
+                'ar' => 'العودة إلى التقويم',
+                'en' => 'Back to Calendar'
+            ],
+            'generate_students_summary' => [
+                'ar' => 'إنشاء ملخص الطلاب',
+                'en' => 'Generate Students Summary'
+            ],
+            'memorization_details' => [
+                'ar' => 'تفاصيل الحفظ',
+                'en' => 'Memorization Details'
+            ],
+            'revision_details' => [
+                'ar' => 'تفاصيل المراجعة',
+                'en' => 'Revision Details'
+            ],
+            'from' => [
+                'ar' => 'من',
+                'en' => 'From'
+            ],
+            'to' => [
+                'ar' => 'إلى',
+                'en' => 'To'
+            ],
+            'verse' => [
+                'ar' => 'آية',
+                'en' => 'Verse'
+            ],
+            'verses' => [
+                'ar' => 'آيات',
+                'en' => 'Verses'
+            ],
+            'students_summary' => [
+                'ar' => 'ملخص الطلاب',
+                'en' => 'Students Summary'
+            ],
+            'loading' => [
+                'ar' => 'جاري التحميل...',
+                'en' => 'Loading...'
+            ],
+            'generating_summary' => [
+                'ar' => 'جاري إنشاء الملخص...',
+                'en' => 'Generating summary...'
+            ],
+            'close' => [
+                'ar' => 'إغلاق',
+                'en' => 'Close'
+            ],
+            'download' => [
+                'ar' => 'تحميل',
+                'en' => 'Download'
+            ],
+            'share' => [
+                'ar' => 'مشاركة',
+                'en' => 'Share'
+            ],
+            'summary_generated_successfully' => [
+                'ar' => 'تم إنشاء الملخص بنجاح',
+                'en' => 'Summary Generated Successfully'
+            ],
+            'total_students' => [
+                'ar' => 'إجمالي الطلاب',
+                'en' => 'Total Students'
+            ],
+            'total_reports' => [
+                'ar' => 'إجمالي التقارير',
+                'en' => 'Total Reports'
+            ],
+            'average_grade' => [
+                'ar' => 'متوسط الدرجات',
+                'en' => 'Average Grade'
+            ],
+            'top_students' => [
+                'ar' => 'أفضل الطلاب',
+                'en' => 'Top Students'
+            ],
+            'reports_count' => [
+                'ar' => 'عدد التقارير',
+                'en' => 'Reports Count'
+            ],
+            'total_memorization' => [
+                'ar' => 'إجمالي الحفظ',
+                'en' => 'Total Memorization'
+            ],
+            'total_revision' => [
+                'ar' => 'إجمالي المراجعة',
+                'en' => 'Total Revision'
+            ],
+            'error_generating_summary' => [
+                'ar' => 'خطأ في إنشاء الملخص',
+                'en' => 'Error Generating Summary'
+            ],
+            'summary_copied_to_clipboard' => [
+                'ar' => 'تم نسخ الملخص إلى الحافظة',
+                'en' => 'Summary Copied to Clipboard'
+            ],
+            'students' => [
+                'ar' => 'طلاب',
+                'en' => 'Students'
+            ],
+            'reports' => [
+                'ar' => 'تقارير',
+                'en' => 'Reports'
+            ],
         ];
     }
 } 

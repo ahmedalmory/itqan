@@ -218,6 +218,64 @@ class PointsTranslationSeeder extends AbstractTranslationSeeder
                 'en' => 'Subtract',
                 'ar' => 'خصم',
             ],
+
+            // Points Summary
+            'points_summary' => [
+                'en' => 'Points Summary',
+                'ar' => 'ملخص النقاط',
+            ],
+            'total_history_records' => [
+                'en' => 'Total History Records',
+                'ar' => 'إجمالي سجلات التاريخ',
+            ],
+            'points_breakdown' => [
+                'en' => 'Points Breakdown',
+                'ar' => 'تفصيل النقاط',
+            ],
+            'records_count' => [
+                'en' => 'Records Count',
+                'ar' => 'عدد السجلات',
+            ],
+            'last_activity' => [
+                'en' => 'Last Activity',
+                'ar' => 'آخر نشاط',
+            ],
+            'total_points' => [
+                'en' => 'Total Points',
+                'ar' => 'إجمالي النقاط',
+            ],
+
+            // Success Messages
+            'points_updated_successfully' => [
+                'en' => 'Points updated successfully',
+                'ar' => 'تم تحديث النقاط بنجاح',
+            ],
+
+            // Error Messages
+            'error_updating_points' => [
+                'en' => 'Error updating points',
+                'ar' => 'خطأ في تحديث النقاط',
+            ],
+            'student_not_in_circle' => [
+                'en' => 'Student is not in the selected circle',
+                'ar' => 'الطالب ليس في الحلقة المختارة',
+            ],
+            'unauthorized_action' => [
+                'en' => 'Unauthorized action',
+                'ar' => 'إجراء غير مصرح به',
+            ],
+            'Filter' => [
+                'en' => 'Filter',
+                'ar' => 'فلتر',
+            ],
+            'from_date' => [
+                'en' => 'From Date',
+                'ar' => 'من تاريخ',
+            ],
+            'to_date' => [
+                'en' => 'To Date',
+                'ar' => 'إلى تاريخ',
+            ],
         ];
     }
 } 

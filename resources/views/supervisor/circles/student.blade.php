@@ -165,9 +165,9 @@
                                                     <td>{{ $report->memorization_parts }}</td>
                                                     <td>{{ $report->revision_parts }}</td>
                                                     <td>{{ $report->grade }}</td>
-                                                    <td>{{ $report->fromSurah->name }}</td>
+                                                    <td>{{ optional($report->fromSurah)->name ?? 'N/A' }}</td>
                                                     <td>{{ $report->memorization_from_verse }}</td>
-                                                    <td>{{ $report->toSurah->name }}</td>
+                                                    <td>{{ optional($report->toSurah)->name ?? 'N/A' }}</td>
                                                     <td>{{ $report->memorization_to_verse }}</td>
                                                     <td>{{ $report->notes }}</td>
                                                 </tr>

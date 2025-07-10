@@ -218,6 +218,7 @@ class CircleController extends Controller
         // Get student points and daily reports
         $points = $student->studentPoints()->where('circle_id', $circle->id)->first();
         $reports = $student->dailyReports()
+            ->with(['fromSurah', 'toSurah', 'revision_from_surah', 'revision_to_surah'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
             
