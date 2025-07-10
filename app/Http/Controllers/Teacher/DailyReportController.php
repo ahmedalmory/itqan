@@ -182,7 +182,7 @@ class DailyReportController extends Controller
             
         // Build query for reports
         $reportsQuery = DailyReport::whereIn('student_id', $studentsInCircles)
-            ->with(['student', 'fromSurah', 'toSurah', 'revision_from_surah', 'revision_to_surah']);
+            ->with(['student', 'fromSurah', 'toSurah', 'revisionFromSurah', 'revisionToSurah']);
             
         // Apply filters if any
         if ($request->has('student_id') && $request->student_id) {
@@ -394,7 +394,8 @@ class DailyReportController extends Controller
             if ($selectedCircle) {
                 $students = $selectedCircle->students()->with(['dailyReports' => function($query) use ($currentMonth, $currentYear) {
                     $query->whereMonth('report_date', $currentMonth)
-                          ->whereYear('report_date', $currentYear);
+                          ->whereYear('report_date', $currentYear)
+                          ->with(['fromSurah', 'toSurah', 'revisionFromSurah', 'revisionToSurah']);
                 }])->get();
                 
                 // Prepare calendar data
@@ -471,11 +472,29 @@ class DailyReportController extends Controller
                         $colorClass = 'yellow';
                     }
                     
+                    // Format report data with surah names
+                    $formattedReport = [
+                        'id' => $report->id,
+                        'memorization_parts' => $report->memorization_parts,
+                        'revision_parts' => $report->revision_parts,
+                        'grade' => $report->grade,
+                        'memorization_from_surah' => $report->fromSurah ? $report->fromSurah->name : null,
+                        'memorization_to_surah' => $report->toSurah ? $report->toSurah->name : null,
+                        'memorization_from_verse' => $report->memorization_from_verse,
+                        'memorization_to_verse' => $report->memorization_to_verse,
+                        'revision_from_surah' => $report->revisionFromSurah ? $report->revisionFromSurah->name : null,
+                        'revision_to_surah' => $report->revisionToSurah ? $report->revisionToSurah->name : null,
+                        'revision_from_verse' => $report->revision_from_verse,
+                        'revision_to_verse' => $report->revision_to_verse,
+                        'notes' => $report->notes,
+                        'report_date' => $report->report_date->format('Y-m-d'),
+                    ];
+                    
                     $studentData['days'][$day] = [
                         'date' => $report->report_date->format('Y-m-d'),
                         'has_memorization' => $hasMemorization,
                         'has_revision' => $hasRevision,
-                        'report' => $report,
+                        'report' => (object) $formattedReport,
                         'color_class' => $colorClass
                     ];
                 }
@@ -547,7 +566,7 @@ class DailyReportController extends Controller
         
                 $report = DailyReport::where('student_id', $studentId)
              ->where('report_date', $date)
-             ->with(['fromSurah', 'toSurah', 'revision_from_surah', 'revision_to_surah'])
+             ->with(['fromSurah', 'toSurah', 'revisionFromSurah', 'revisionToSurah'])
              ->first();
             
         if (!$report) {
@@ -565,8 +584,8 @@ class DailyReportController extends Controller
                 'memorization_to_surah' => $report->toSurah ? $report->toSurah->name : null,
                 'memorization_from_verse' => $report->memorization_from_verse,
                 'memorization_to_verse' => $report->memorization_to_verse,
-                'revision_from_surah' => $report->revision_from_surah ? $report->revision_from_surah->name : null,
-                'revision_to_surah' => $report->revision_to_surah ? $report->revision_to_surah->name : null,
+                'revision_from_surah' => $report->revisionFromSurah ? $report->revisionFromSurah->name : null,
+                'revision_to_surah' => $report->revisionToSurah ? $report->revisionToSurah->name : null,
                 'revision_from_verse' => $report->revision_from_verse,
                 'revision_to_verse' => $report->revision_to_verse,
                 'notes' => $report->notes,

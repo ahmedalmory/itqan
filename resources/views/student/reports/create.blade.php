@@ -23,10 +23,10 @@
         <form action="{{ route('student.reports.store') }}" method="POST" id="reportForm" class="needs-validation" novalidate>
             @csrf
             
-            <div class="row mb-3">
+            <div class="row mb-4">
                 <div class="col-md-6">
                     <label for="report_date" class="form-label required">{{ t('report_date') }}</label>
-                    <input type="date" class="form-control @error('report_date') is-invalid @enderror" 
+                    <input type="date" class="form-control form-control-lg @error('report_date') is-invalid @enderror" 
                            id="report_date" name="report_date" 
                            value="{{ old('report_date', now()->format('Y-m-d')) }}" required>
                     @error('report_date')
@@ -34,97 +34,172 @@
                     @enderror
                 </div>
             </div>
-            
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="memorization_parts" class="form-label required">{{ t('memorization_parts') }}</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control text-center @error('memorization_parts') is-invalid @enderror" 
-                               id="memorization_parts" name="memorization_parts" required readonly
-                               value="{{ old('memorization_parts', '0') }}">
-                        <button type="button" class="btn btn-outline-secondary" onclick="adjustParts('memorization', 0.25)">+ ربع</button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="adjustParts('memorization', 0.5)">+ نصف</button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="adjustParts('memorization', 1)">+ 1</button>
-                        <button type="button" class="btn btn-outline-danger" onclick="resetParts('memorization')">صفر</button>
-                    </div>
-                    @error('memorization_parts')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+
+            <div class="card mb-4 bg-light">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ t('memorization') }}</h5>
                 </div>
-                <div class="col-md-6">
-                    <label for="revision_parts" class="form-label required">{{ t('revision_parts') }}</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control text-center @error('revision_parts') is-invalid @enderror" 
-                               id="revision_parts" name="revision_parts" required readonly
-                               value="{{ old('revision_parts', '0') }}">
-                        <button type="button" class="btn btn-outline-secondary" onclick="adjustParts('revision', 0.25)">+ ربع</button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="adjustParts('revision', 0.5)">+ نصف</button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="adjustParts('revision', 1)">+ 1</button>
-                        <button type="button" class="btn btn-outline-danger" onclick="resetParts('revision')">صفر</button>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="memorization_parts" class="form-label required">{{ t('memorization_parts') }}</label>
+                            <div class="input-group input-group-lg">
+                                <input type="text" class="form-control text-center fw-bold @error('memorization_parts') is-invalid @enderror" 
+                                       id="memorization_parts" name="memorization_parts" required readonly
+                                       value="{{ old('memorization_parts', '0') }}">
+                                <button type="button" class="btn btn-outline-primary" onclick="adjustParts('memorization', 0.25)">+ ربع</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="adjustParts('memorization', 0.5)">+ نصف</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="adjustParts('memorization', 1)">+ 1</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="resetParts('memorization')">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            @error('memorization_parts')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
-                    @error('revision_parts')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="memorization_from_surah_id" class="form-label">{{ t('memorization_from_surah') }}</label>
+                            <select class="form-select form-select-lg @error('memorization_from_surah_id') is-invalid @enderror" 
+                                    id="memorization_from_surah_id" name="memorization_from_surah_id">
+                                <option value="">{{ t('select_surah') }}</option>
+                                @foreach($surahs as $surah)
+                                <option value="{{ $surah->id }}" {{ old('memorization_from_surah_id') == $surah->id ? 'selected' : '' }}>
+                                    {{ $surah->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('memorization_from_surah_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label for="memorization_from_verse" class="form-label">{{ t('from_verse') }}</label>
+                            <input type="number" class="form-control form-control-lg @error('memorization_from_verse') is-invalid @enderror" 
+                                   id="memorization_from_verse" name="memorization_from_verse" min="1" 
+                                   value="{{ old('memorization_from_verse') }}">
+                            @error('memorization_from_verse')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label for="memorization_to_surah_id" class="form-label">{{ t('memorization_to_surah') }}</label>
+                            <select class="form-select form-select-lg @error('memorization_to_surah_id') is-invalid @enderror" 
+                                    id="memorization_to_surah_id" name="memorization_to_surah_id">
+                                <option value="">{{ t('select_surah') }}</option>
+                                @foreach($surahs as $surah)
+                                <option value="{{ $surah->id }}" {{ old('memorization_to_surah_id') == $surah->id ? 'selected' : '' }}>
+                                    {{ $surah->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('memorization_to_surah_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label for="memorization_to_verse" class="form-label">{{ t('to_verse') }}</label>
+                            <input type="number" class="form-control form-control-lg @error('memorization_to_verse') is-invalid @enderror" 
+                                   id="memorization_to_verse" name="memorization_to_verse" min="1" 
+                                   value="{{ old('memorization_to_verse') }}">
+                            @error('memorization_to_verse')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4 bg-light">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ t('revision') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="revision_parts" class="form-label required">{{ t('revision_parts') }}</label>
+                            <div class="input-group input-group-lg">
+                                <input type="text" class="form-control text-center fw-bold @error('revision_parts') is-invalid @enderror" 
+                                       id="revision_parts" name="revision_parts" required readonly
+                                       value="{{ old('revision_parts', '0') }}">
+                                <button type="button" class="btn btn-outline-primary" onclick="adjustParts('revision', 0.25)">+ ربع</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="adjustParts('revision', 0.5)">+ نصف</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="adjustParts('revision', 1)">+ 1</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="resetParts('revision')">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            @error('revision_parts')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="revision_from_surah" class="form-label">{{ t('revision_from_surah') }}</label>
+                            <select class="form-select form-select-lg @error('revision_from_surah') is-invalid @enderror" 
+                                    id="revision_from_surah" name="revision_from_surah">
+                                <option value="">{{ t('select_surah') }}</option>
+                                @foreach($surahs as $surah)
+                                <option value="{{ $surah->id }}" {{ old('revision_from_surah') == $surah->id ? 'selected' : '' }}>
+                                    {{ $surah->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('revision_from_surah')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label for="revision_from_verse" class="form-label">{{ t('from_verse') }}</label>
+                            <input type="number" class="form-control form-control-lg @error('revision_from_verse') is-invalid @enderror" 
+                                   id="revision_from_verse" name="revision_from_verse" min="1" 
+                                   value="{{ old('revision_from_verse') }}">
+                            @error('revision_from_verse')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label for="revision_to_surah" class="form-label">{{ t('revision_to_surah') }}</label>
+                            <select class="form-select form-select-lg @error('revision_to_surah') is-invalid @enderror" 
+                                    id="revision_to_surah" name="revision_to_surah">
+                                <option value="">{{ t('select_surah') }}</option>
+                                @foreach($surahs as $surah)
+                                <option value="{{ $surah->id }}" {{ old('revision_to_surah') == $surah->id ? 'selected' : '' }}>
+                                    {{ $surah->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('revision_to_surah')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label for="revision_to_verse" class="form-label">{{ t('to_verse') }}</label>
+                            <input type="number" class="form-control form-control-lg @error('revision_to_verse') is-invalid @enderror" 
+                                   id="revision_to_verse" name="revision_to_verse" min="1" 
+                                   value="{{ old('revision_to_verse') }}">
+                            @error('revision_to_verse')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label for="memorization_from_surah_id" class="form-label">{{ t('memorization_from_surah') }}</label>
-                    <select class="form-select @error('memorization_from_surah_id') is-invalid @enderror" 
-                            id="memorization_from_surah_id" name="memorization_from_surah_id">
-                        <option value="">{{ t('select_surah') }}</option>
-                        @foreach($surahs as $surah)
-                        <option value="{{ $surah->id }}" {{ old('memorization_from_surah_id') == $surah->id ? 'selected' : '' }}>
-                            {{ $surah->name }}
-                        </option>
-                        @endforeach
-                    </select>
-                    @error('memorization_from_surah_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="col-md-3">
-                    <label for="memorization_from_verse" class="form-label">{{ t('from_verse') }}</label>
-                    <input type="number" class="form-control @error('memorization_from_verse') is-invalid @enderror" 
-                           id="memorization_from_verse" name="memorization_from_verse" min="1" 
-                           value="{{ old('memorization_from_verse') }}">
-                    @error('memorization_from_verse')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="col-md-3">
-                    <label for="memorization_to_surah_id" class="form-label">{{ t('memorization_to_surah') }}</label>
-                    <select class="form-select @error('memorization_to_surah_id') is-invalid @enderror" 
-                            id="memorization_to_surah_id" name="memorization_to_surah_id">
-                        <option value="">{{ t('select_surah') }}</option>
-                        @foreach($surahs as $surah)
-                        <option value="{{ $surah->id }}" {{ old('memorization_to_surah_id') == $surah->id ? 'selected' : '' }}>
-                            {{ $surah->name }}
-                        </option>
-                        @endforeach
-                    </select>
-                    @error('memorization_to_surah_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="col-md-3">
-                    <label for="memorization_to_verse" class="form-label">{{ t('to_verse') }}</label>
-                    <input type="number" class="form-control @error('memorization_to_verse') is-invalid @enderror" 
-                           id="memorization_to_verse" name="memorization_to_verse" min="1" 
-                           value="{{ old('memorization_to_verse') }}">
-                    @error('memorization_to_verse')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-            
-            <div class="row mb-3">
+            <div class="row mb-4">
                 <div class="col-md-6">
                     <label for="grade" class="form-label">{{ t('grade') }}</label>
-                    <input type="number" class="form-control @error('grade') is-invalid @enderror" 
-                           id="grade" name="grade" min="0" max="100" step="1" 
-                           value="{{ old('grade') }}">
+                    <div class="input-group input-group-lg">
+                        <input type="number" class="form-control form-control-lg @error('grade') is-invalid @enderror" 
+                               id="grade" name="grade" min="0" max="100" step="1" 
+                               value="{{ old('grade') }}">
+                        <span class="input-group-text">/ 100</span>
+                    </div>
                     @error('grade')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -133,15 +208,18 @@
             
             <div class="mb-4">
                 <label for="notes" class="form-label">{{ t('notes') }}</label>
-                <textarea class="form-control @error('notes') is-invalid @enderror" 
-                          id="notes" name="notes" rows="3">{{ old('notes') }}</textarea>
+                <textarea class="form-control form-control-lg @error('notes') is-invalid @enderror" 
+                          id="notes" name="notes" rows="3" placeholder="{{ t('enter_notes_here') }}">{{ old('notes') }}</textarea>
                 @error('notes')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
             
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary">
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ route('student.reports.index') }}" class="btn btn-light btn-lg">
+                    {{ t('cancel') }}
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg">
                     <i class="bi bi-save me-1"></i> {{ t('create_report') }}
                 </button>
             </div>
@@ -215,6 +293,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const fromVerseInput = document.getElementById('memorization_from_verse');
     const toVerseInput = document.getElementById('memorization_to_verse');
     
+    const revisionFromSurahSelect = document.getElementById('revision_from_surah');
+    const revisionToSurahSelect = document.getElementById('revision_to_surah');
+    const revisionFromVerseInput = document.getElementById('revision_from_verse');
+    const revisionToVerseInput = document.getElementById('revision_to_verse');
+    
     document.getElementById('memorization_parts').value = formatParts(memorizationParts);
     document.getElementById('revision_parts').value = formatParts(revisionParts);
 
@@ -225,10 +308,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (toSurahSelect.value) {
         updateVerseLimits(toSurahSelect, toVerseInput);
     }
+    if (revisionFromSurahSelect.value) {
+        updateVerseLimits(revisionFromSurahSelect, revisionFromVerseInput);
+    }
+    if (revisionToSurahSelect.value) {
+        updateVerseLimits(revisionToSurahSelect, revisionToVerseInput);
+    }
 
     // Update verse limits when surah selection changes
     fromSurahSelect.addEventListener('change', () => updateVerseLimits(fromSurahSelect, fromVerseInput));
     toSurahSelect.addEventListener('change', () => updateVerseLimits(toSurahSelect, toVerseInput));
+    revisionFromSurahSelect.addEventListener('change', () => updateVerseLimits(revisionFromSurahSelect, revisionFromVerseInput));
+    revisionToSurahSelect.addEventListener('change', () => updateVerseLimits(revisionToSurahSelect, revisionToVerseInput));
 
     // Form validation
     document.getElementById('reportForm').addEventListener('submit', function(e) {
@@ -237,6 +328,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const fromVerse = parseInt(fromVerseInput.value);
         const toVerse = parseInt(toVerseInput.value);
         
+        const revisionFromSurahId = parseInt(revisionFromSurahSelect.value);
+        const revisionToSurahId = parseInt(revisionToSurahSelect.value);
+        const revisionFromVerse = parseInt(revisionFromVerseInput.value);
+        const revisionToVerse = parseInt(revisionToVerseInput.value);
+        
         // Validate that at least one of memorization or revision is greater than 0
         if (memorizationParts === 0 && revisionParts === 0) {
             e.preventDefault();
@@ -244,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        // Only validate verses if both surah and verse are provided
+        // Only validate memorization verses if both surah and verse are provided
         if (fromSurahId && toSurahId && fromVerse && toVerse) {
             const fromSurah = surahsMap.get(fromSurahId);
             const toSurah = surahsMap.get(toSurahId);
@@ -270,6 +366,36 @@ document.addEventListener('DOMContentLoaded', function() {
             if (fromSurahId > toSurahId) {
                 e.preventDefault();
                 alert('{{ t("from_surah_must_be_before_to_surah") }}');
+                return false;
+            }
+        }
+
+        // Only validate revision verses if both surah and verse are provided
+        if (revisionFromSurahId && revisionToSurahId && revisionFromVerse && revisionToVerse) {
+            const revisionFromSurah = surahsMap.get(revisionFromSurahId);
+            const revisionToSurah = surahsMap.get(revisionToSurahId);
+            
+            if (revisionFromVerse < 1 || revisionFromVerse > revisionFromSurah.total_verses) {
+                e.preventDefault();
+                alert('{{ t("invalid_revision_from_verse") }}');
+                return false;
+            }
+            
+            if (revisionToVerse < 1 || revisionToVerse > revisionToSurah.total_verses) {
+                e.preventDefault();
+                alert('{{ t("invalid_revision_to_verse") }}');
+                return false;
+            }
+            
+            if (revisionFromSurahId === revisionToSurahId && revisionFromVerse > revisionToVerse) {
+                e.preventDefault();
+                alert('{{ t("revision_from_verse_must_be_less_than_to_verse") }}');
+                return false;
+            }
+            
+            if (revisionFromSurahId > revisionToSurahId) {
+                e.preventDefault();
+                alert('{{ t("revision_from_surah_must_be_before_to_surah") }}');
                 return false;
             }
         }

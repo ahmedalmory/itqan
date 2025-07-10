@@ -186,8 +186,8 @@ class ReportController extends Controller
             'student.circles.department',
             'memorization_from_surah',
             'memorization_to_surah',
-            'revision_from_surah',
-            'revision_to_surah'
+            'revisionFromSurah',
+            'revisionToSurah'
         ])->orderBy('report_date', 'desc');
             
         // Filter by student name if provided
@@ -254,11 +254,11 @@ class ReportController extends Controller
                 $memorizationTo = $report->memorization_to_surah ? 
                     $report->memorization_to_surah->name . ' (' . $report->memorization_to_verse . ')' : 'N/A';
                     
-                $revisionFrom = $report->revision_from_surah ? 
-                    $report->revision_from_surah->name . ' (' . $report->revision_from_verse . ')' : 'N/A';
+                $revisionFrom = $report->revisionFromSurah ? 
+                    $report->revisionFromSurah->name . ' (' . $report->revision_from_verse . ')' : 'N/A';
                     
-                $revisionTo = $report->revision_to_surah ? 
-                    $report->revision_to_surah->name . ' (' . $report->revision_to_verse . ')' : 'N/A';
+                $revisionTo = $report->revisionToSurah ? 
+                    $report->revisionToSurah->name . ' (' . $report->revision_to_verse . ')' : 'N/A';
                 
                 $row = [
                     $report->id,
@@ -305,8 +305,8 @@ class ReportController extends Controller
             'student.circles.department',
             'memorization_from_surah',
             'memorization_to_surah',
-            'revision_from_surah',
-            'revision_to_surah'
+            'revisionFromSurah',
+            'revisionToSurah'
         ]);
         
         return view('admin.reports.show', compact('report'));
@@ -324,8 +324,8 @@ class ReportController extends Controller
             'student', 
             'memorization_from_surah',
             'memorization_to_surah',
-            'revision_from_surah',
-            'revision_to_surah'
+            'revisionFromSurah',
+            'revisionToSurah'
         ]);
         
         $students = User::where('role', 'student')->orderBy('name')->get();

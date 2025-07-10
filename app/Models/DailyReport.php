@@ -86,7 +86,7 @@ class DailyReport extends Model
     /**
      * Get the starting surah for revision.
      */
-    public function revision_from_surah()
+    public function revisionFromSurah()
     {
         return $this->belongsTo(Surah::class, 'revision_from_surah');
     }
@@ -94,7 +94,7 @@ class DailyReport extends Model
     /**
      * Get the ending surah for revision.
      */
-    public function revision_to_surah()
+    public function revisionToSurah()
     {
         return $this->belongsTo(Surah::class, 'revision_to_surah');
     }

@@ -152,28 +152,28 @@
                                                        title="
                                                        <div class='text-start'>
                                                            <strong>{{ t('revision_details') }}</strong><br>
-                                                           {{ t('from') }}: {{ optional($report->revision_from_surah)->name ?? 'N/A' }} 
+                                                           {{ t('from') }}: {{ optional($report->revisionFromSurah)->name ?? 'N/A' }} 
                                                            @if($report->revision_from_verse)
                                                                - {{ t('verse') }} {{ $report->revision_from_verse }}
                                                            @endif
                                                            <br>
-                                                           {{ t('to') }}: {{ optional($report->revision_to_surah)->name ?? 'N/A' }}
+                                                           {{ t('to') }}: {{ optional($report->revisionToSurah)->name ?? 'N/A' }}
                                                            @if($report->revision_to_verse)
                                                                - {{ t('verse') }} {{ $report->revision_to_verse }}
                                                            @endif
-                                                           @if($report->revision_from_surah && is_object($report->revision_from_surah) && $report->revision_from_surah->total_verses)
-                                                               <br><small>{{ $report->revision_from_surah->name }}: {{ $report->revision_from_surah->total_verses }} {{ t('verses') }}</small>
+                                                           @if($report->revisionFromSurah && is_object($report->revisionFromSurah) && $report->revisionFromSurah->total_verses)
+                                                               <br><small>{{ $report->revisionFromSurah->name }}: {{ $report->revisionFromSurah->total_verses }} {{ t('verses') }}</small>
                                                            @endif
-                                                           @if($report->revision_to_surah && is_object($report->revision_to_surah) && $report->revision_to_surah->total_verses && $report->revision_to_surah->id != optional($report->revision_from_surah)->id)
-                                                               <br><small>{{ $report->revision_to_surah->name }}: {{ $report->revision_to_surah->total_verses }} {{ t('verses') }}</small>
+                                                           @if($report->revisionToSurah && is_object($report->revisionToSurah) && $report->revisionToSurah->total_verses && $report->revisionToSurah->id != optional($report->revisionFromSurah)->id)
+                                                               <br><small>{{ $report->revisionToSurah->name }}: {{ $report->revisionToSurah->total_verses }} {{ t('verses') }}</small>
                                                            @endif
                                                        </div>
                                                        "></i>
                                                 @endif
                                             </div>
-                                            @if($report->revision_from_surah || $report->revision_to_surah)
+                                            @if($report->revisionFromSurah || $report->revisionToSurah)
                                                 <small class="text-muted d-block">
-                                                    ({{ optional($report->revision_from_surah)->name ?? 'N/A' }} - {{ optional($report->revision_to_surah)->name ?? 'N/A' }})
+                                                    ({{ optional($report->revisionFromSurah)->name ?? 'N/A' }} - {{ optional($report->revisionToSurah)->name ?? 'N/A' }})
                                                 </small>
                                             @endif
                                         @else

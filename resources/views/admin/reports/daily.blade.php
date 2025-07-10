@@ -138,12 +138,12 @@
                             </td>
                             <td>
                                 {{ $report->revision_parts }} {{ t('parts') }}
-                                @if($report->revision_from_surah)
+                                @if($report->revisionFromSurah)
                                     <small class="d-block text-muted">
-                                        {{ $report->revision_from_surah->name ?? '' }}
+                                        {{ $report->revisionFromSurah->name ?? '' }}
                                         {{ $report->revision_from_verse ? $report->revision_from_verse : '' }}
                                         -
-                                        {{ $report->revision_to_surah->name ?? '' }}
+                                        {{ $report->revisionToSurah->name ?? '' }}
                                         {{ $report->revision_to_verse ? $report->revision_to_verse : '' }}
                                     </small>
                                 @endif

@@ -529,6 +529,78 @@ class DailyReportTranslationSeeder extends AbstractTranslationSeeder
                 'ar' => 'تقارير',
                 'en' => 'Reports'
             ],
+            
+            // Missing translations for form validation and labels
+            'create_daily_report' => [
+                'ar' => 'إنشاء تقرير يومي',
+                'en' => 'Create Daily Report'
+            ],
+            'back_to_reports' => [
+                'ar' => 'العودة إلى التقارير',
+                'en' => 'Back to Reports'
+            ],
+            'memorization_from_surah' => [
+                'ar' => 'من سورة (الحفظ)',
+                'en' => 'From Surah (Memorization)'
+            ],
+            'memorization_to_surah' => [
+                'ar' => 'إلى سورة (الحفظ)',
+                'en' => 'To Surah (Memorization)'
+            ],
+            'revision_from_surah' => [
+                'ar' => 'من سورة (المراجعة)',
+                'en' => 'From Surah (Revision)'
+            ],
+            'revision_to_surah' => [
+                'ar' => 'إلى سورة (المراجعة)',
+                'en' => 'To Surah (Revision)'
+            ],
+            'enter_notes_here' => [
+                'ar' => 'أدخل الملاحظات هنا',
+                'en' => 'Enter notes here'
+            ],
+            'create_report' => [
+                'ar' => 'إنشاء التقرير',
+                'en' => 'Create Report'
+            ],
+            
+            // Validation messages
+            'must_enter_memorization_or_revision' => [
+                'ar' => 'يجب إدخال الحفظ أو المراجعة',
+                'en' => 'Must enter memorization or revision'
+            ],
+            'invalid_from_verse' => [
+                'ar' => 'رقم الآية البدائية غير صحيح',
+                'en' => 'Invalid from verse number'
+            ],
+            'invalid_to_verse' => [
+                'ar' => 'رقم الآية النهائية غير صحيح',
+                'en' => 'Invalid to verse number'
+            ],
+            'from_verse_must_be_less_than_to_verse' => [
+                'ar' => 'يجب أن يكون رقم الآية البدائية أقل من رقم الآية النهائية',
+                'en' => 'From verse must be less than to verse'
+            ],
+            'from_surah_must_be_before_to_surah' => [
+                'ar' => 'يجب أن تكون السورة البدائية قبل السورة النهائية',
+                'en' => 'From surah must be before to surah'
+            ],
+            'invalid_revision_from_verse' => [
+                'ar' => 'رقم آية البداية للمراجعة غير صحيح',
+                'en' => 'Invalid revision from verse number'
+            ],
+            'invalid_revision_to_verse' => [
+                'ar' => 'رقم آية النهاية للمراجعة غير صحيح',
+                'en' => 'Invalid revision to verse number'
+            ],
+            'revision_from_verse_must_be_less_than_to_verse' => [
+                'ar' => 'يجب أن يكون رقم آية البداية للمراجعة أقل من رقم آية النهاية',
+                'en' => 'Revision from verse must be less than to verse'
+            ],
+            'revision_from_surah_must_be_before_to_surah' => [
+                'ar' => 'يجب أن تكون سورة البداية للمراجعة قبل سورة النهاية',
+                'en' => 'Revision from surah must be before to surah'
+            ],
         ];
     }
 } 
