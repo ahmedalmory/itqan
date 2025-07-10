@@ -24,6 +24,10 @@ class PointsTranslationSeeder extends AbstractTranslationSeeder
                 'en' => 'View Leaderboard',
                 'ar' => 'عرض لوحة الصدارة',
             ],
+            'Share as Image' => [
+                'en' => 'Share as Image',
+                'ar' => 'مشاركة كصورة',
+            ],
             'Bulk Assign Points' => [
                 'en' => 'Bulk Assign Points',
                 'ar' => 'إضافة نقاط للجميع',

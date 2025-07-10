@@ -4,9 +4,14 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">{{ t('Points Leaderboard') }} 🏆</h1>
-        <a href="{{ route('teacher.points.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> {{ t('Back to Points') }}
-        </a>
+        <div>
+            <button onclick="captureAndShare()" class="btn btn-success me-2">
+                <i class="bi bi-share"></i> {{ t('Share as Image') }}
+            </button>
+            <a href="{{ route('teacher.points.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> {{ t('Back to Points') }}
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -21,7 +26,7 @@
         </div>
     @endif
 
-    <div class="card shadow-sm">
+    <div class="card shadow-sm" id="leaderboard-content">
         <div class="card-header bg-light py-3">
             <form method="GET" action="{{ route('teacher.points.leaderboard') }}" class="row g-3 align-items-center">
                 <div class="col-md-4">
@@ -235,4 +240,50 @@
     margin: 0 0.25rem;
 }
 </style>
-@endsection 
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+async function captureAndShare() {
+    try {
+        // Capture the leaderboard content as an image
+        const element = document.getElementById('leaderboard-content');
+        const canvas = await html2canvas(element, {
+            scale: 2, // Higher quality
+            backgroundColor: '#ffffff'
+        });
+        
+        // Convert canvas to blob
+        canvas.toBlob(async (blob) => {
+            try {
+                // Create file from blob
+                const file = new File([blob], 'leaderboard.png', { type: 'image/png' });
+                
+                // Check if Web Share API supports sharing files
+                if (navigator.share && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Points Leaderboard',
+                    });
+                } else {
+                    // Fallback: Create a download link
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'leaderboard.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+            } catch (error) {
+                console.error('Error sharing:', error);
+                alert('Error sharing the image. Please try again.');
+            }
+        }, 'image/png');
+    } catch (error) {
+        console.error('Error capturing screenshot:', error);
+        alert('Error capturing the image. Please try again.');
+    }
+}
+</script>
+@endsection
