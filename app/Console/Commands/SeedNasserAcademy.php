@@ -34,10 +34,11 @@ class SeedNasserAcademy extends Command
         }
 
         if ($this->option('countries-only')) {
-            $this->info('🌍 Seeding countries and languages only...');
+            $this->info('🌍 Seeding countries, languages, and surahs only...');
             $this->call('db:seed', ['--class' => 'Database\\Seeders\\LanguageSeeder']);
             $this->call('db:seed', ['--class' => 'Database\\Seeders\\CountrySeeder']);
-            $this->info('✅ Countries and languages seeded successfully!');
+            $this->call('db:seed', ['--class' => 'Database\\Seeders\\SurahSeeder']);
+            $this->info('✅ Countries, languages, and surahs seeded successfully!');
             return;
         }
 
@@ -47,6 +48,7 @@ class SeedNasserAcademy extends Command
         $this->info('📚 Seeding required dependencies...');
         $this->call('db:seed', ['--class' => 'Database\\Seeders\\LanguageSeeder']);
         $this->call('db:seed', ['--class' => 'Database\\Seeders\\CountrySeeder']);
+        $this->call('db:seed', ['--class' => 'Database\\Seeders\\SurahSeeder']);
         
         // Seed translations
         $this->info('🌐 Seeding translations...');
@@ -68,6 +70,7 @@ class SeedNasserAcademy extends Command
         $this->line('   - Teachers: 9 teachers with real contact information');
         $this->line('   - Study Circles: 10 circles with different age groups and times');
         $this->line('   - Students: Sample students from the provided CSV data');
+        $this->line('   - Surahs: All 114 Surahs with verse counts');
         $this->line('   - Translations: Academy-specific Arabic/English translations');
         $this->line('   - Countries: Support for 8 countries including Estonia');
         $this->line('');
