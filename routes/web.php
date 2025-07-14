@@ -8,9 +8,9 @@ use App\Http\Controllers\Student\ReportController;
 use App\Http\Controllers\Student\SubscriptionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Supervisor\CircleController as SupervisorCircleController;
 
 /*
@@ -38,7 +38,7 @@ Route::get('/language/{locale}', function ($locale) {
             app()->setLocale($locale);
         }
     } catch (\Exception $e) {
-        \Log::error('Language switch error: ' . $e->getMessage());
+        \Illuminate\Support\Facades\Log::error('Language switch error: ' . $e->getMessage());
     }
     
     return redirect()->back();
@@ -118,6 +118,11 @@ Route::middleware(['auth', 'role:super_admin,department_admin'])->prefix('admin'
     Route::post('/translations', [\App\Http\Controllers\Admin\TranslationController::class, 'store'])->name('translations.store');
     Route::get('/translations/create', [\App\Http\Controllers\Admin\TranslationController::class, 'create'])->name('translations.create');
     Route::get('/translations/{translation}/edit', [\App\Http\Controllers\Admin\TranslationController::class, 'edit'])->name('translations.edit');
+    
+    // Task management
+    Route::resource('tasks', \App\Http\Controllers\Admin\TaskController::class);
+    
+    Route::get('/tasks/statistics', [\App\Http\Controllers\Admin\TaskController::class, 'statistics'])->name('tasks.statistics');
     Route::put('/translations/{translation}', [\App\Http\Controllers\Admin\TranslationController::class, 'update'])->name('translations.update');
     Route::delete('/translations/{translation}', [\App\Http\Controllers\Admin\TranslationController::class, 'destroy'])->name('translations.destroy');
     Route::post('/translations/generate', [\App\Http\Controllers\Admin\TranslationController::class, 'generate'])->name('translations.generate');
@@ -150,6 +155,14 @@ Route::middleware(['auth', 'role:department_admin'])->prefix('department-admin')
     Route::post('/points/bulk', [\App\Http\Controllers\DepartmentAdmin\PointsController::class, 'bulkUpdate'])->name('points.bulk-update');
     Route::get('/points/student/{student}', [\App\Http\Controllers\DepartmentAdmin\PointsController::class, 'history'])->name('points.history');
     Route::get('/points/leaderboard', [\App\Http\Controllers\DepartmentAdmin\PointsController::class, 'leaderboard'])->name('points.leaderboard');
+    
+    // Task management
+    Route::resource('tasks', \App\Http\Controllers\DepartmentAdmin\TaskController::class);
+    
+    Route::get('/tasks/statistics', [\App\Http\Controllers\DepartmentAdmin\TaskController::class, 'statistics'])->name('tasks.statistics');
+    Route::get('/tasks/my-tasks', [\App\Http\Controllers\DepartmentAdmin\TaskController::class, 'myTasks'])->name('tasks.my-tasks');
+    Route::post('/tasks/{assignment}/complete', [\App\Http\Controllers\DepartmentAdmin\TaskController::class, 'complete'])->name('tasks.complete');
+    Route::post('/tasks/{assignment}/uncomplete', [\App\Http\Controllers\DepartmentAdmin\TaskController::class, 'uncomplete'])->name('tasks.uncomplete');
 });
 
 // Teacher routes
@@ -183,6 +196,21 @@ Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->name('teacher.')
     Route::prefix('rewards')->name('rewards.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Teacher\RewardController::class, 'index'])->name('index');
         Route::get('/{reward}', [\App\Http\Controllers\Teacher\RewardController::class, 'show'])->name('show');
+    });
+    
+    // Task management
+    Route::prefix('tasks')->name('tasks.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Teacher\TaskController::class, 'index'])->name('index');
+        Route::get('/today', [\App\Http\Controllers\Teacher\TaskController::class, 'today'])->name('today');
+        Route::get('/completion-report', [\App\Http\Controllers\Teacher\TaskController::class, 'getCompletionReport'])->name('completion-report');
+        Route::get('/share-text', [\App\Http\Controllers\Teacher\TaskController::class, 'generateShareText'])->name('share-text');
+        Route::get('/statistics', [\App\Http\Controllers\Teacher\TaskController::class, 'statistics'])->name('statistics');
+        Route::post('/complete-task', [\App\Http\Controllers\Teacher\TaskController::class, 'completeTask'])->name('complete-task');
+        Route::post('/uncomplete-task', [\App\Http\Controllers\Teacher\TaskController::class, 'uncompleteTask'])->name('uncomplete-task');
+        Route::post('/bulk-complete', [\App\Http\Controllers\Teacher\TaskController::class, 'bulkComplete'])->name('bulk-complete');
+        Route::get('/{assignment}', [\App\Http\Controllers\Teacher\TaskController::class, 'show'])->name('show');
+        Route::post('/{assignment}/complete', [\App\Http\Controllers\Teacher\TaskController::class, 'complete'])->name('complete');
+        Route::post('/{assignment}/uncomplete', [\App\Http\Controllers\Teacher\TaskController::class, 'uncomplete'])->name('uncomplete');
     });
 });
 
@@ -267,6 +295,21 @@ Route::middleware(['auth', 'role:supervisor'])->prefix('supervisor')->name('supe
         Route::get('/', [\App\Http\Controllers\Supervisor\RewardController::class, 'index'])->name('index');
         Route::get('/{reward}', [\App\Http\Controllers\Supervisor\RewardController::class, 'show'])->name('show');
     });
+    
+    // Task management
+    Route::prefix('tasks')->name('tasks.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Supervisor\TaskController::class, 'index'])->name('index');
+        Route::get('/today', [\App\Http\Controllers\Supervisor\TaskController::class, 'today'])->name('today');
+        Route::get('/completion-report', [\App\Http\Controllers\Supervisor\TaskController::class, 'getCompletionReport'])->name('completion-report');
+        Route::get('/share-text', [\App\Http\Controllers\Supervisor\TaskController::class, 'generateShareText'])->name('share-text');
+        Route::get('/statistics', [\App\Http\Controllers\Supervisor\TaskController::class, 'statistics'])->name('statistics');
+        Route::post('/complete-task', [\App\Http\Controllers\Supervisor\TaskController::class, 'completeTask'])->name('complete-task');
+        Route::post('/uncomplete-task', [\App\Http\Controllers\Supervisor\TaskController::class, 'uncompleteTask'])->name('uncomplete-task');
+        Route::post('/bulk-complete', [\App\Http\Controllers\Supervisor\TaskController::class, 'bulkComplete'])->name('bulk-complete');
+        Route::get('/{assignment}', [\App\Http\Controllers\Supervisor\TaskController::class, 'show'])->name('show');
+        Route::post('/{assignment}/complete', [\App\Http\Controllers\Supervisor\TaskController::class, 'complete'])->name('complete');
+        Route::post('/{assignment}/uncomplete', [\App\Http\Controllers\Supervisor\TaskController::class, 'uncomplete'])->name('uncomplete');
+    });
 });
 
 // Payment Routes
@@ -277,3 +320,17 @@ Route::prefix('payment')->group(function () {
 
 // Webhook Routes
 Route::post('webhooks/tap', [PaymentController::class, 'handleWebhook'])->name('webhooks.tap');
+
+// API Routes for dynamic loading
+        Route::get('/api/departments/{department}/users', [\App\Http\Controllers\Admin\TaskController::class, 'getDepartmentUsers'])->name('api.departments.users');
+        Route::get('/api/all-users', [\App\Http\Controllers\Admin\TaskController::class, 'getAllUsers'])->name('api.all-users');
+
+// Test route for debugging
+Route::get('/test-teacher-route', function () {
+    return response()->json(['message' => 'Route is working', 'timestamp' => now()]);
+});
+
+// Test the teacher share-text route without authentication
+Route::get('/test-share-text', function () {
+    return response()->json(['message' => 'Share text route working', 'timestamp' => now()]);
+});

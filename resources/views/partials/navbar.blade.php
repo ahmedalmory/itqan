@@ -70,6 +70,12 @@
                                 <i class="bi bi-gift me-1"></i> {{ t('Rewards') }}
                             </a>
                         </li>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link rounded-pill px-3 {{ request()->is('admin/tasks*') ? 'active' : '' }}" 
+                               href="{{ route('admin.tasks.index') }}">
+                                <i class="bi bi-list-task me-1"></i> {{ t('tasks') }}
+                            </a>
+                        </li>
                         
                         <!-- Language Management -->
                         <li class="nav-item dropdown mx-1">
@@ -112,6 +118,12 @@
                                 <i class="bi bi-gift me-1"></i> {{ t('Rewards') }}
                             </a>
                         </li>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link rounded-pill px-3 {{ request()->is('teacher/tasks*') ? 'active' : '' }}" 
+                               href="{{ route('teacher.tasks.index') }}">
+                                <i class="bi bi-list-task me-1"></i> {{ t('tasks') }}
+                            </a>
+                        </li>
                     @elseif(Auth::user()->isSupervisor())
                         <li class="nav-item mx-1">
                             <a class="nav-link rounded-pill px-3 {{ request()->is('supervisor/dashboard') ? 'active' : '' }}" 
@@ -123,6 +135,12 @@
                             <a class="nav-link rounded-pill px-3 {{ request()->is('supervisor/rewards*') ? 'active' : '' }}" 
                                href="{{ route('supervisor.rewards.index') }}">
                                 <i class="bi bi-gift me-1"></i> {{ t('Rewards') }}
+                            </a>
+                        </li>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link rounded-pill px-3 {{ request()->is('supervisor/tasks*') ? 'active' : '' }}" 
+                               href="{{ route('supervisor.tasks.index') }}">
+                                <i class="bi bi-list-task me-1"></i> {{ t('tasks') }}
                             </a>
                         </li>
                     @elseif(Auth::user()->isStudent())

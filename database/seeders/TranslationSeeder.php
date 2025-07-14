@@ -17,6 +17,7 @@ use Database\Seeders\Translations\DailyReportTranslationSeeder;
 use Database\Seeders\Translations\PointsTranslationSeeder;
 use Database\Seeders\Translations\ProfileTranslationSeeder;
 use Database\Seeders\Translations\RewardTranslationSeeder;
+use Database\Seeders\Translations\TaskTranslationSeeder;
 use App\Models\Language;
 
 class TranslationSeeder extends Seeder
@@ -45,6 +46,7 @@ class TranslationSeeder extends Seeder
             PointsTranslationSeeder::class,
             ProfileTranslationSeeder::class,
             RewardTranslationSeeder::class,
+            TaskTranslationSeeder::class,
         ]);
         
         $this->command->info('All translation seeders have been run successfully!');

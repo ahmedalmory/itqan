@@ -197,6 +197,55 @@ class User extends Authenticatable
     }
     
     /**
+     * Get the tasks created by this user.
+     */
+    public function createdTasks()
+    {
+        return $this->hasMany(Task::class, 'created_by');
+    }
+    
+    /**
+     * Get the task assignments for this user.
+     */
+    public function taskAssignments()
+    {
+        return $this->hasMany(TaskAssignment::class, 'assigned_to_user_id');
+    }
+    
+    /**
+     * Get the task completions by this user.
+     */
+    public function taskCompletions()
+    {
+        return $this->hasMany(TaskCompletion::class, 'completed_by');
+    }
+    
+    /**
+     * Get pending task assignments for this user.
+     */
+    public function pendingTaskAssignments()
+    {
+        return $this->hasMany(TaskAssignment::class, 'assigned_to_user_id')
+                    ->where('status', 'pending');
+    }
+    
+    /**
+     * Get task assignments for this user (including role-based assignments).
+     */
+    public function getAllTaskAssignments()
+    {
+        return TaskAssignment::forUser($this);
+    }
+    
+    /**
+     * Get today's task assignments for this user.
+     */
+    public function getTodaysTaskAssignments()
+    {
+        return TaskAssignment::forUser($this)->forToday();
+    }
+    
+    /**
      * Get the student's total points balance across all circles.
      */
     public function getTotalPointsBalanceAttribute(): int

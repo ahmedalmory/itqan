@@ -19,6 +19,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         DailyReport::class => DailyReportPolicy::class,
         StudentSubscription::class => StudentSubscriptionPolicy::class,
+        \App\Models\Task::class => \App\Policies\TaskPolicy::class,
     ];
 
     /**
