@@ -74,6 +74,14 @@ class Department extends Model
     }
 
     /**
+     * Get the study circles for the department (alias for circles).
+     */
+    public function studyCircles()
+    {
+        return $this->hasMany(StudyCircle::class);
+    }
+
+    /**
      * Get the students for the department through circles.
      */
     public function students()

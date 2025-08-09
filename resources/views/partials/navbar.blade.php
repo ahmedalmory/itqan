@@ -76,6 +76,12 @@
                                 <i class="bi bi-list-task me-1"></i> {{ t('tasks') }}
                             </a>
                         </li>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link rounded-pill px-3 {{ request()->is('admin/reports*') ? 'active' : '' }}" 
+                               href="{{ route('admin.reports.index') }}">
+                                <i class="bi bi-graph-up me-1"></i> {{ t('reports') }}
+                            </a>
+                        </li>
                         
                         <!-- Language Management -->
                         <li class="nav-item dropdown mx-1">

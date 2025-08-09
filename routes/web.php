@@ -95,16 +95,21 @@ Route::middleware(['auth', 'role:super_admin,department_admin'])->prefix('admin'
     Route::get('/points/student/{student}', [\App\Http\Controllers\Admin\PointsController::class, 'history'])->name('points.history');
     Route::get('/points/leaderboard', [\App\Http\Controllers\Admin\PointsController::class, 'leaderboard'])->name('points.leaderboard');
     
-    // Reports management
-    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports');
-    Route::get('/reports/daily', [\App\Http\Controllers\Admin\ReportController::class, 'dailyReports'])->name('reports.daily');
-    Route::get('/reports/export', [\App\Http\Controllers\Admin\ReportController::class, 'export'])->name('reports.export');
-    Route::get('/reports/export-daily', [\App\Http\Controllers\Admin\ReportController::class, 'exportDaily'])->name('reports.export-daily');
-    Route::post('/reports/bulk', [\App\Http\Controllers\Admin\ReportController::class, 'bulkStore'])->name('reports.bulk-store');
-    Route::get('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
-    Route::get('/reports/{report}/edit', [\App\Http\Controllers\Admin\ReportController::class, 'edit'])->name('reports.edit');
-    Route::put('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'update'])->name('reports.update');
-    Route::post('/reports/import', [\App\Http\Controllers\Admin\ReportController::class, 'import'])->name('reports.import');
+    // Reports management (Daily Reports)
+    Route::get('/daily-reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('daily-reports');
+    Route::get('/daily-reports/daily', [\App\Http\Controllers\Admin\ReportController::class, 'dailyReports'])->name('daily-reports.daily');
+    Route::get('/daily-reports/export', [\App\Http\Controllers\Admin\ReportController::class, 'export'])->name('daily-reports.export');
+    Route::get('/daily-reports/export-daily', [\App\Http\Controllers\Admin\ReportController::class, 'exportDaily'])->name('daily-reports.export-daily');
+    Route::post('/daily-reports/bulk', [\App\Http\Controllers\Admin\ReportController::class, 'bulkStore'])->name('daily-reports.bulk-store');
+    Route::get('/daily-reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('daily-reports.show');
+    Route::get('/daily-reports/{report}/edit', [\App\Http\Controllers\Admin\ReportController::class, 'edit'])->name('daily-reports.edit');
+    Route::put('/daily-reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'update'])->name('daily-reports.update');
+    Route::post('/daily-reports/import', [\App\Http\Controllers\Admin\ReportController::class, 'import'])->name('daily-reports.import');
+    
+    // Reports Analytics Section
+    Route::get('/reports', [\App\Http\Controllers\Admin\ReportsController::class, 'index'])->name('reports.index');
+    Route::get('/reports/detailed', [\App\Http\Controllers\Admin\ReportsController::class, 'detailed'])->name('reports.detailed');
+    Route::get('/reports/export', [\App\Http\Controllers\Admin\ReportsController::class, 'export'])->name('reports.export');
     
     // Subscription management
     Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
